@@ -1,13 +1,15 @@
+import io
 from time import sleep
 from tkinter import *
 from datetime import datetime
 
+from PIL import Image
 
-class Object:
+from objects.center_part import CenterPart
+from objects.markers import Markers
+from objects.object import Object
 
-    def draw(self, canvas, delta_time, window):
-        pass
-
+from os import  system
 
 class Window(Frame):
 
@@ -23,7 +25,7 @@ class Window(Frame):
         self.init_window()
 
     def init_window(self):
-        self.master.title("Spray Simulation")
+        self.master.title("Spray Testbed")
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self)
         self.canvas.pack(fill=BOTH, expand=1)
@@ -36,14 +38,19 @@ class Window(Frame):
         for obj in self.objects:
             obj.draw(self.canvas, delta_time=self.delta_time, window=self)
 
-        self.x += 100 * self.delta_time
-        self.canvas.create_oval(self.x, 0, self.x + 50, 50, outline="#f11",
-                                fill="#1f1", width=2)
+        # self.x += 100 * self.delta_time
+        """self.canvas.create_oval(self.x, 0, self.x + 50, 50, outline="#f11",
+                                fill="#1f1", width=2)"""
 
         self.canvas.create_text(50, 10, fill="darkblue", font="Consolas 20 italic bold",
                                 text=str((1000 / (self.delta_time * 1000)).__round__()) + " FPS")
 
         self.master.after(16, self.frame)
+
+    def save_frame(self):
+        ps = self.canvas.postscript(colormode='color')
+        img = Image.open(io.BytesIO(ps.encode('utf-8')))
+        img.save('test.jpg')
 
     def destroy(self):
         self.destroyed = True
@@ -52,7 +59,18 @@ class Window(Frame):
 
 root = Tk()
 root.geometry("960x540")
-app = Window(root, [])
+Object.CANVAS_WIDTH = 960
+Object.CANVAS_HEIGHT = 540
+
+marker_radius = 10
+border_margin = 5
+
+center_part_width = 50
+center_part_height = 50
+center_part_marker_offset_x = 25
+center_part_marker_offset_y = 25
+
+app = Window(root, [CenterPart(border_margin, 540 - center_part_height - border_margin, center_part_width, center_part_height, center_part_marker_offset_x, center_part_marker_offset_y), Markers(marker_radius, border_margin)])
 
 root.after(16, app.frame)
 root.mainloop()
