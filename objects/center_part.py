@@ -79,6 +79,9 @@ class CenterPart(Object):
             p2x, p2y = self.points_sprayed[i + 1]
             canvas.create_line(p1x, p1y, p2x, p2y, fill="#000")
 
+        self.x += random.randint(1, 50) * delta_time
+        self.y -= random.randint(1, 50) * delta_time
+
         canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill_color,
                                 outline="#000", width=1)
 
@@ -104,8 +107,25 @@ class CenterPart(Object):
             ]
         ]
 
-        for marker in self.motor_positions:
-            canvas.create_oval(marker[0], marker[1], marker[2], marker[3], fill=self.marker_fill_color)
+        for motor in self.motor_positions:
+            canvas.create_oval(motor[0], motor[1], motor[2], motor[3], fill=self.marker_fill_color)
+
+        a = self.motor_positions[0][4] - self.border_margin
+        b = self.motor_positions[0][5] - self.border_margin
+        distance_motor_left_to_left_corner = math.sqrt(a * a + b * b)
+
+        canvas.create_oval(self.border_margin - distance_motor_left_to_left_corner,
+                           self.border_margin - distance_motor_left_to_left_corner,
+                           self.border_margin + distance_motor_left_to_left_corner,
+                           self.border_margin + distance_motor_left_to_left_corner)
+
+        a = self.motor_positions[1][4] - (self.CANVAS_WIDTH - self.border_margin)
+        b = self.motor_positions[1][5] - self.border_margin
+        distance_motor_right_to_right_corner = math.sqrt(a * a + b * b)
+        canvas.create_oval((self.CANVAS_WIDTH - self.border_margin) - distance_motor_right_to_right_corner,
+                           self.border_margin - distance_motor_right_to_right_corner,
+                           (self.CANVAS_WIDTH - self.border_margin) + distance_motor_right_to_right_corner,
+                           self.border_margin + distance_motor_right_to_right_corner)
 
         canvas.create_oval(center_x - self.marker_radius, center_y - self.marker_radius, center_x + self.marker_radius,
                            center_y + self.marker_radius, fill="#6EFF40")
@@ -152,4 +172,5 @@ class CenterPart(Object):
             print("Popped: ", self.POPPED)
             self.last_x = self.x
             self.last_y = self.y
+
             self.last_print = datetime.now()
