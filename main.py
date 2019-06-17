@@ -9,7 +9,8 @@ from objects.center_part import CenterPart
 from objects.markers import Markers
 from objects.object import Object
 
-from os import  system
+from os import system
+
 
 class Window(Frame):
 
@@ -70,7 +71,10 @@ center_part_height = 50
 center_part_marker_offset_x = 25
 center_part_marker_offset_y = 25
 
-app = Window(root, [CenterPart(border_margin, 540 - center_part_height - border_margin, center_part_width, center_part_height, center_part_marker_offset_x, center_part_marker_offset_y), Markers(marker_radius, border_margin)])
+app = Window(root, [
+    CenterPart(border_margin, 540 - center_part_height - border_margin, center_part_width, center_part_height,
+               center_part_marker_offset_x, center_part_marker_offset_y, border_margin),
+    Markers(marker_radius, border_margin)])
 
 root.after(16, app.frame)
 root.mainloop()
