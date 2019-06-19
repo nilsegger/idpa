@@ -7,9 +7,7 @@ class Markers(Object):
         self.radius = radius
         self.border_margin = border_margin
         self.fill_color = fill_color
-
         d = self.radius * 2
-
         self.markers = [
             [
                 self.border_margin,
