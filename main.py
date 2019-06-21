@@ -6,8 +6,9 @@ from datetime import datetime
 from PIL import Image
 
 from objects.center_part import CenterPart
+from objects.find_angle import AngleFinder
 from objects.markers import Markers
-from objects.object import Object
+from objects.object import Object, ObjectDimension
 
 from os import system
 
@@ -63,18 +64,26 @@ root.geometry("960x540")
 Object.CANVAS_WIDTH = 960
 Object.CANVAS_HEIGHT = 540
 
-marker_radius = 10
+"""marker_radius = 10
 border_margin = 5
 
 center_part_width = 50
 center_part_height = 50
 center_part_marker_offset_x = 25
-center_part_marker_offset_y = 25
+center_part_marker_offset_y = 25"""
+
+center_part = ObjectDimension(200, 400, 50, 50)
+motor_left = ObjectDimension(190, 390, 20, 20)
+motor_right = ObjectDimension(240, 390, 20, 20)
+corner_left = ObjectDimension(30, 30, 15, 15)
+corner_right = ObjectDimension(Object.CANVAS_WIDTH - 45, 30, 15, 15)
 
 app = Window(root, [
-    CenterPart(border_margin + 100, 540 - center_part_height - border_margin, center_part_width, center_part_height,
-               center_part_marker_offset_x, center_part_marker_offset_y, border_margin, marker_radius=marker_radius),
-    Markers(marker_radius, border_margin)])
+    AngleFinder(motor_left, motor_right, corner_left, corner_right),
+    # CenterPart(border_margin + 100, 540 - center_part_height - border_margin, center_part_width, center_part_height,
+    #           center_part_marker_offset_x, center_part_marker_offset_y, border_margin, marker_radius=marker_radius),
+    # Markers(marker_radius, border_margin)
+])
 
 root.after(16, app.frame)
 root.mainloop()
