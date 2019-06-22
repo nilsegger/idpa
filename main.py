@@ -19,11 +19,12 @@ class Window(Frame):
         Frame.__init__(self, master)
         self.destroyed = False
         self.master = master
+        self.master.bind_all('<Key>', self.key_press)
         self.canvas = None
         self.objects = objects
         self.delta_time = 0
-        self.x = 0
         self.last_frame_datetime = datetime.now()
+        self.pause = False
         self.init_window()
 
     def init_window(self):
@@ -32,20 +33,18 @@ class Window(Frame):
         self.canvas = Canvas(self)
         self.canvas.pack(fill=BOTH, expand=1)
 
+    def key_press(self, event):
+        if event.keysym == 'space':
+            self.pause = not self.pause
+
     def frame(self):
         self.delta_time = datetime.now().timestamp() - self.last_frame_datetime.timestamp()
         self.last_frame_datetime = datetime.now()
-        self.canvas.delete("all")
 
-        for obj in self.objects:
-            obj.draw(self.canvas, delta_time=self.delta_time, window=self)
-
-        # self.x += 100 * self.delta_time
-        """self.canvas.create_oval(self.x, 0, self.x + 50, 50, outline="#f11",
-                                fill="#1f1", width=2)"""
-
-        # self.canvas.create_text(50, 10, fill="darkblue", font="Consolas 20 italic bold",
-        #                        text=str((1000 / (self.delta_time * 1000)).__round__()) + " FPS")
+        if not self.pause:
+            self.canvas.delete("all")
+            for obj in self.objects:
+                obj.draw(self.canvas, delta_time=self.delta_time, window=self)
 
         self.master.after(16, self.frame)
 

@@ -49,6 +49,14 @@ class AngleFinder(Object):
 
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
                     self.move_right_motor(1, 0.01)
+            else:
+                while self.motor_left.center.y > self.motor_right.center.y:
+                    self.move_left_motor(-1, 0.01)
+
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
+                    self.move_left_motor(-1, 0.01)
+                    self.move_right_motor(1, 0.01)
+
 
     @property
     def motor_right_to_right_corner_vec(self):
