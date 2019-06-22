@@ -31,20 +31,20 @@ class AngleFinder(Object):
         self.left_rope_too_tense = False
 
     def calculate_starting_distances(self):
-        self.motor_to_motor_starting_distance = self.calculate_length(self.motor_left, self.motor_right)
-        self.motor_left_to_left_corner = self.calculate_length(self.motor_left, self.corner_left)
-        self.motor_right_to_right_corner = self.calculate_length(self.motor_right, self.corner_right)
+        self.motor_to_motor_starting_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
+        self.motor_left_to_left_corner = self.calculate_length(self.motor_left.center, self.corner_left.center)
+        self.motor_right_to_right_corner = self.calculate_length(self.motor_right.center, self.corner_right.center)
         self.calculate_distances()
         self.calculate_vectors()
 
     def calculate_distances(self):
-        self.distance_corner_to_corner = self.calculate_length(self.corner_left, self.corner_right)
-        self.motor_left_to_right_corner = self.calculate_length(self.motor_left, self.corner_right)
-        self.motor_right_to_left_corner = self.calculate_length(self.motor_right, self.corner_left)
+        self.distance_corner_to_corner = self.calculate_length(self.corner_left.center, self.corner_right.center)
+        self.motor_left_to_right_corner = self.calculate_length(self.motor_left.center, self.corner_right.center)
+        self.motor_right_to_left_corner = self.calculate_length(self.motor_right.center, self.corner_left.center)
 
     def calculate_vectors(self):
-        self.motor_left_to_left_corner_vec = self.calculate_vec(self.corner_left, self.motor_left)
-        self.motor_right_to_right_corner_vec = self.calculate_vec(self.corner_right, self.motor_right)
+        self.motor_left_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+        self.motor_right_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
 
     def spin_left_motor(self, speed):
         self.motor_left_to_left_corner += speed
@@ -55,35 +55,15 @@ class AngleFinder(Object):
         if speed < 0:
             self.motor_right.pos.add(self.motor_right_to_right_corner_vec, speed)
 
-            # versueche motor distanz wedr anezbecho numme mit seil dreihe
-            temp_motor_pos = Vec2(copy=self.motor_left.pos)
-            current_motor_distance = self.calculate_length(self.motor_left, self.motor_right)
-            motor_distance_delta = current_motor_distance - self.motor_to_motor_starting_distance
-            angle = self.angle_between_vectors(self.corner_left.center, self.motor_left.center)
-            while angle < 90 and (-5 < motor_distance_delta < 5) and self.motor_left.center.y >= self.motor_right.center.y:
-                vec = self.calculate_vec(self.corner_left, self.motor_left)
-                vec.rotate(-0.1)
-                new_left_motor_position = Vec2(copy=self.corner_left.pos)
-                new_left_motor_position.add(vec, self.motor_left_to_left_corner)
-                self.motor_left.pos = new_left_motor_position
-
-                current_motor_distance = self.calculate_length(self.motor_left, self.motor_right)
-                angle = self.angle_between_vectors(self.corner_left.center, self.motor_left.center)
-                motor_distance_delta = current_motor_distance - self.motor_to_motor_starting_distance
-                print("---")
-                print(angle)
-                print(current_motor_distance, ">", self.motor_to_motor_starting_distance)
-                print(self.motor_left.center.y, ">", self.motor_right.center.y)
-
-                """vec.rotate(-1)
-                new_motor_pos = Vec2(copy=self.corner_left.pos)
-                new_motor_pos.add(vec, self.motor_left_to_left_corner)
-                self.motor_left.pos = new_motor_pos"""
-
-            if angle + 1 >= 90:
-                self.motor_left.pos = temp_motor_pos
-            # print(angle)
-            # print(current_motor_distance)
+            current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
+            while current_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
+                vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+                vec.rotate(-1)
+                rotated_new_point = Vec2(copy=self.corner_left.center)
+                rotated_new_point.add(vec, self.motor_left_to_left_corner)
+                target_vec = self.calculate_vec(self.motor_left.center, rotated_new_point)
+                self.motor_left.pos.add(target_vec, 0.01)
+                current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
 
     def check_tension(self):
         if self.motor_left_to_left_corner + self.motor_to_motor_starting_distance + self.motor_right_to_right_corner < self.distance_corner_to_corner:
@@ -123,5 +103,5 @@ class AngleFinder(Object):
                        fill_color=("black" if not self.right_rope_too_tense else "red"))
 
         self.draw_line(canvas, self.motor_left, self.motor_right, fill_color=(
-            "black" if self.calculate_length(self.motor_left,
-                                             self.motor_right) <= self.motor_to_motor_starting_distance else "red"))
+            "black" if self.calculate_length(self.motor_left.center,
+                                             self.motor_right.center) <= self.motor_to_motor_starting_distance else "red"))

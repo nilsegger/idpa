@@ -62,23 +62,23 @@ class Object:
         pass
 
     @staticmethod
-    def calculate_length(p1: ObjectDimension, p2: ObjectDimension) -> float:
-        a = p2.center.x - p1.center.x
-        b = p2.center.y - p1.center.y
+    def calculate_length(p1: Vec2, p2: Vec2) -> float:
+        a = p2.x - p1.x
+        b = p2.y - p1.y
         return math.sqrt(a * a + b * b)
 
     @staticmethod
-    def calculate_vec(p1: ObjectDimension, p2: ObjectDimension, length=1) -> Vec2:
-        vec = Vec2(p2.center.x - p1.center.x, p2.center.y - p1.center.y)
+    def calculate_vec(p1: Vec2, p2: Vec2, length=1) -> Vec2:
+        vec = Vec2(p2.x - p1.x, p2.y - p1.y)
         vec.set_length(length)
         return vec
 
     @staticmethod
     def angle_between_vectors(v1: Vec2, v2: Vec2) -> float:
-        return math.atan2(v2.x-v1.x, v2.y-v1.y) * 180 / math.pi
+        #return math.atan2(v2.x-v1.x, v2.y-v1.y) * 180 / math.pi
 
-        """alpha = (v1.x * v2.x + v1.y * v2.y) / (v1.length * v2.length)
-        return math.acos(alpha) * 180 / math.pi"""
+        alpha = (v1.x * v2.x + v1.y * v2.y) / (v1.length * v2.length)
+        return math.acos(alpha) * 180 / math.pi
 
     @staticmethod
     def draw_line(canvas: Canvas, p1: ObjectDimension, p2: ObjectDimension, fill_color=None):
