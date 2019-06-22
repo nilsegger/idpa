@@ -58,7 +58,7 @@ class AngleFinder(Object):
             temp_left_motor_corner_distance = self.calculate_length(self.motor_left.center, self.corner_left.center)
             current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
 
-            """while current_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y and not self.check_tension():
+            while current_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
                 rotation_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
                 rotation_vec.rotate(-1)
                 rotated_new_point = Vec2(copy=self.corner_left.center)
@@ -70,17 +70,59 @@ class AngleFinder(Object):
                 self.motor_left.pos.add(rotation_vec,
                                         temp_left_motor_corner_distance - self.calculate_length(self.corner_left.center, self.motor_left.center))
 
-                current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)"""
+                current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
 
-            #while current_motor_distance > self.motor_to_motor_starting_distance and not self.check_tension():
-            for i in range(500):
+            angle = 180
+            temp_pos = self.motor_right.pos
+            temp_right_motor_corner_distance = self.calculate_length(self.motor_right.center, self.corner_right.center)
+            while angle >= 90 and current_motor_distance > self.motor_to_motor_starting_distance:
                 rotation_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
                 rotation_vec.rotate(1)
                 rotated_point = Vec2(copy=self.corner_right.center)
-                rotated_point.add(rotation_vec, self.calculate_length(self.motor_right.center, self.corner_right.center))
+                rotated_point.add(rotation_vec, temp_right_motor_corner_distance)
                 forward_vec = self.calculate_vec(self.motor_right.center, rotated_point)
                 self.motor_right.pos.add(forward_vec, 0.01)
+                self.motor_right.pos.add(rotation_vec,
+                                         temp_right_motor_corner_distance - self.calculate_length(self.motor_right.center, self.corner_right.center))
                 current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
+
+                angle = self.angle_between_vectors(self.motor_right.center, self.corner_right.center)
+                print(angle)
+
+            if angle <= 90:
+                self.motor_right.pos = temp_pos
+
+    @property
+    def current_motor_to_motor_distance(self) -> float:
+        return self.calculate_length(self.motor_left.center, self.motor_right.center)
+
+    def move_left_motor(self, degree: float, forward: float):
+        distance_to_corner = self.current_left_motor_to_corner_distance
+        rotation_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+        rotation_vec.rotate(degree)
+        rotated_point = Vec2(copy=self.corner_left.center)
+        rotated_point.add(rotation_vec, distance_to_corner)
+        forward_vec = self.calculate_vec(self.motor_left.center, rotated_point)
+        self.motor_left.pos.add(forward_vec, forward)
+        self.motor_left.pos.add(rotation_vec, distance_to_corner - self.current_left_motor_to_corner_distance)
+
+    @property
+    def current_left_motor_to_corner_distance(self) -> float:
+        return self.calculate_length(self.motor_left.center, self.corner_left.center)
+
+    def move_right_motor(self, degree: float, forward: float):
+        distance_to_corner = self.current_right_motor_to_corner_distance
+        rotation_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+        rotation_vec.rotate(degree)
+        rotated_point = Vec2(copy=self.corner_right.center)
+        rotated_point.add(rotation_vec, distance_to_corner)
+        forward_vec = self.calculate_vec(self.motor_right.center, rotated_point)
+        self.motor_right.pos.add(forward_vec, forward)
+        self.motor_right.pos.add(rotation_vec, distance_to_corner - self.current_right_motor_to_corner_distance)
+
+    @property
+    def current_right_motor_to_corner_distance(self) -> float:
+        return self.calculate_length(self.motor_right.center, self.corner_right.center)
 
     def check_tension(self):
         tension = False
