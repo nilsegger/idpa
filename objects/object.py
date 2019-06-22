@@ -31,13 +31,22 @@ class Vec2:
         self.x = self.x / (current_length / new_length)
         self.y = self.y / (current_length / new_length)
 
-
     def add(self, vec, distance=1):
         self.x += vec.x * distance
         self.y += vec.y * distance
 
+    def compare(self, vec2, after_comma_precision=2) -> bool:
+        precision = 1
+        for i in range(after_comma_precision):
+            precision *= 10
+
+        self_copy = Vec2(round(self.x*precision), round(self.y*precision))
+        compare_copy = Vec2(round(vec2.x*precision), round(vec2.y*precision))
+        return self_copy.x == compare_copy.x and self_copy.y == compare_copy.y
+
     def print(self, name="Vec2"):
         print(name, " ", self.x, ", ", self.y, " Length: ", self.length)
+
 
 class ObjectDimension:
 
@@ -78,8 +87,8 @@ class Object:
     def angle_between_vectors(v1: Vec2, v2: Vec2) -> float:
         return math.atan2(v2.x - v1.x, v2.y - v1.y) * 180 / math.pi
 
-        alpha = (v1.x * v2.x + v1.y * v2.y) / (v1.length * v2.length)
-        return math.acos(alpha) * 180 / math.pi
+        """alpha = (v1.x * v2.x + v1.y * v2.y) / (v1.length * v2.length)
+        return math.acos(alpha) * 180 / math.pi"""
 
     @staticmethod
     def draw_line(canvas: Canvas, p1: ObjectDimension, p2: ObjectDimension, fill_color=None):

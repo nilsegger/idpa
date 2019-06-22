@@ -1,27 +1,26 @@
 import io
-from time import sleep
 from tkinter import *
 from datetime import datetime
 
 from PIL import Image
 
-from objects.center_part import CenterPart
-from objects.find_angle import AngleFinder
-from objects.markers import Markers
-from objects.object import Object, ObjectDimension
+from objects.simulation import Simulation
+from objects.object import Object, ObjectDimension, Vec2
 
 from os import system
 
 
 class Window(Frame):
 
-    def __init__(self, master, objects):
+    def __init__(self, master, simulation : Simulation):
         Frame.__init__(self, master)
         self.destroyed = False
         self.master = master
-        self.master.bind_all('<Key>', self.key_press)
+        self.master.bind_all('<KeyPress>', self.key_press)
+        self.master.bind_all('<KeyRelease>', self.key_release)
+        self.keys = {}
         self.canvas = None
-        self.objects = objects
+        self.simulation = simulation
         self.delta_time = 0
         self.last_frame_datetime = datetime.now()
         self.pause = False
@@ -36,15 +35,32 @@ class Window(Frame):
     def key_press(self, event):
         if event.keysym == 'space':
             self.pause = not self.pause
+        else:
+            self.keys[event.keysym] = True
+
+    def key_release(self, event):
+        if event.keysym == 'space':
+            self.pause = not self.pause
+        else:
+            self.keys[event.keysym] = False
 
     def frame(self):
         self.delta_time = datetime.now().timestamp() - self.last_frame_datetime.timestamp()
         self.last_frame_datetime = datetime.now()
 
+        if 'w' in self.keys and self.keys['w']:
+            self.simulation.spin_left_motor(-50 * self.delta_time)
+        if 's' in self.keys and self.keys['s']:
+            self.simulation.spin_left_motor(50 * self.delta_time)
+
+        if 'Up' in self.keys and self.keys['Up']:
+            self.simulation.spin_right_motor(-50 * self.delta_time)
+        if 'Down' in self.keys and self.keys['Down']:
+            self.simulation.spin_right_motor(50 * self.delta_time)
+
         if not self.pause:
             self.canvas.delete("all")
-            for obj in self.objects:
-                obj.draw(self.canvas, delta_time=self.delta_time, window=self)
+            self.simulation.draw(self.canvas, delta_time=self.delta_time, window=self)
 
         self.master.after(16, self.frame)
 
@@ -56,7 +72,6 @@ class Window(Frame):
     def destroy(self):
         self.destroyed = True
         super().destroy()
-
 
 root = Tk()
 root.geometry("960x540")
@@ -77,12 +92,7 @@ motor_right = ObjectDimension(240, 390, 20, 20)
 corner_left = ObjectDimension(30, 30, 15, 15)
 corner_right = ObjectDimension(Object.CANVAS_WIDTH - 45, 30, 15, 15)
 
-app = Window(root, [
-    AngleFinder(motor_left, motor_right, corner_left, corner_right),
-    # CenterPart(border_margin + 100, 540 - center_part_height - border_margin, center_part_width, center_part_height,
-    #           center_part_marker_offset_x, center_part_marker_offset_y, border_margin, marker_radius=marker_radius),
-    # Markers(marker_radius, border_margin)
-])
+app = Window(root, Simulation(motor_left, motor_right, corner_left, corner_right))
 
 root.after(16, app.frame)
 root.mainloop()

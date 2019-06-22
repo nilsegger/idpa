@@ -6,7 +6,7 @@ import math
 from .object import *
 
 
-class AngleFinder(Object):
+class Simulation(Object):
 
     def __init__(self, motor_left: ObjectDimension, motor_right: ObjectDimension,
                  corner_left: ObjectDimension, corner_right: ObjectDimension):
@@ -33,16 +33,17 @@ class AngleFinder(Object):
     def spin_left_motor(self, speed):
         self.left_rope_distance += speed
 
+    k = 0
+
     def spin_right_motor(self, speed):
 
-        if self.has_rope_tension():
+        if speed < 0 and self.has_rope_tension():
             return
 
         self.right_rope_distance += speed
+        self.motor_right.pos.add(self.motor_right_to_right_corner_vec, speed)
 
         if speed < 0:
-            self.motor_right.pos.add(self.motor_right_to_right_corner_vec, speed)
-
             if self.ropes_intercept:
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
                     self.move_left_motor(-1, 0.01)
@@ -56,6 +57,32 @@ class AngleFinder(Object):
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
                     self.move_left_motor(-1, 0.01)
                     self.move_right_motor(1, 0.01)
+        else:
+            while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
+                self.move_right_motor(-1, 0.01)
+                while self.motor_left.center.y < self.motor_right.center.y <= self.corner_left.center.y + self.left_rope_distance:
+                    self.move_left_motor(1, 1)
+
+
+
+            # Wenn, de punkt vum linkte motor + motor distanz witr weg isch vum rechte corner denne söttis efach abe bamble
+
+            """current_motor_vec = self.calculate_vec(self.motor_left.center, self.motor_right.center)
+            dream_right_motor_pos = Vec2(copy=self.motor_left.center)
+            dream_right_motor_pos.add(current_motor_vec, self.motor_to_motor_starting_distance)
+            right_rope_is_slack = self.calculate_length(dream_right_motor_pos, self.corner_right.pos) > self.right_rope_distance"""
+
+            left_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+            right_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_right.center)
+
+            while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance \
+                    and not left_motor_to_left_corner_vec.compare(right_motor_to_left_corner_vec, 2):
+
+                self.move_left_motor(-1, 1.5)
+
+                left_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+                right_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_right.center)
+
 
 
     @property
@@ -113,9 +140,6 @@ class AngleFinder(Object):
         return tension
 
     def draw(self, canvas: Canvas, delta_time: float, window: Frame):
-
-        self.spin_right_motor(-50 * delta_time)
-
         self.has_rope_tension()
 
         self.draw_circle(canvas, self.corner_left, fill_color="red")
