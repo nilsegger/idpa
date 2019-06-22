@@ -17,27 +17,27 @@ class Vec2:
     def length(self):
         return math.sqrt(self.x * self.x + self.y * self.y)
 
-    """@propery
-    def angle(self):"""
-
     def rotate(self, degrees):
         radians = math.radians(degrees)
         cos_radian = math.cos(radians)
         sin_radian = math.sin(radians)
         x = self.x
         y = self.y
-        self.x = cos_radian*x-sin_radian*y
-        self.y = sin_radian*x+cos_radian*y
+        self.x = cos_radian * x - sin_radian * y
+        self.y = sin_radian * x + cos_radian * y
 
     def set_length(self, new_length=1):
         current_length = self.length
         self.x = self.x / (current_length / new_length)
         self.y = self.y / (current_length / new_length)
 
-    def add(self, vec, distance):
+
+    def add(self, vec, distance=1):
         self.x += vec.x * distance
         self.y += vec.y * distance
 
+    def print(self, name="Vec2"):
+        print(name, " ", self.x, ", ", self.y, " Length: ", self.length)
 
 class ObjectDimension:
 
@@ -70,12 +70,13 @@ class Object:
     @staticmethod
     def calculate_vec(p1: Vec2, p2: Vec2, length=1) -> Vec2:
         vec = Vec2(p2.x - p1.x, p2.y - p1.y)
-        vec.set_length(length)
+        if length is not None:
+            vec.set_length(length)
         return vec
 
     @staticmethod
     def angle_between_vectors(v1: Vec2, v2: Vec2) -> float:
-        #return math.atan2(v2.x-v1.x, v2.y-v1.y) * 180 / math.pi
+        return math.atan2(v2.x - v1.x, v2.y - v1.y) * 180 / math.pi
 
         alpha = (v1.x * v2.x + v1.y * v2.y) / (v1.length * v2.length)
         return math.acos(alpha) * 180 / math.pi

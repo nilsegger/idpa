@@ -55,27 +55,48 @@ class AngleFinder(Object):
         if speed < 0:
             self.motor_right.pos.add(self.motor_right_to_right_corner_vec, speed)
 
+            temp_left_motor_corner_distance = self.calculate_length(self.motor_left.center, self.corner_left.center)
             current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
-            while current_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
-                vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
-                vec.rotate(-1)
+
+            """while current_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y and not self.check_tension():
+                rotation_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
+                rotation_vec.rotate(-1)
                 rotated_new_point = Vec2(copy=self.corner_left.center)
-                rotated_new_point.add(vec, self.motor_left_to_left_corner)
+                rotated_new_point.add(rotation_vec, temp_left_motor_corner_distance)
                 target_vec = self.calculate_vec(self.motor_left.center, rotated_new_point)
                 self.motor_left.pos.add(target_vec, 0.01)
+
+                # Korrektur, da mir ned direkt mitem roation vec schaffed wird de kreis immer kliner, mit dem dümmers wedr uf de rand use setze
+                self.motor_left.pos.add(rotation_vec,
+                                        temp_left_motor_corner_distance - self.calculate_length(self.corner_left.center, self.motor_left.center))
+
+                current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)"""
+
+            #while current_motor_distance > self.motor_to_motor_starting_distance and not self.check_tension():
+            for i in range(500):
+                rotation_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+                rotation_vec.rotate(1)
+                rotated_point = Vec2(copy=self.corner_right.center)
+                rotated_point.add(rotation_vec, self.calculate_length(self.motor_right.center, self.corner_right.center))
+                forward_vec = self.calculate_vec(self.motor_right.center, rotated_point)
+                self.motor_right.pos.add(forward_vec, 0.01)
                 current_motor_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
 
     def check_tension(self):
-        if self.motor_left_to_left_corner + self.motor_to_motor_starting_distance + self.motor_right_to_right_corner < self.distance_corner_to_corner:
+        tension = False
+        if self.calculate_length(self.corner_left.center, self.motor_left.center) + self.motor_to_motor_starting_distance + self.calculate_length(
+                self.motor_right.center, self.corner_right.center) < self.distance_corner_to_corner:
             self.right_rope_too_tense = True
             self.left_rope_too_tense = True
+            tension = True
         else:
-            self.right_rope_too_tense = True
-            self.left_rope_too_tense = True
+            self.right_rope_too_tense = False
+            self.left_rope_too_tense = False
+        return tension
 
     def draw(self, canvas: Canvas, delta_time: float, window: Frame):
 
-        self.spin_right_motor(-10 * delta_time)
+        self.spin_right_motor(-50 * delta_time)
         self.calculate_vectors()
         self.calculate_distances()
 
