@@ -31,9 +31,48 @@ class Simulation(Object):
         self.corner_to_corner_distance = self.calculate_length(self.corner_left.center, self.corner_right.center)
 
     def spin_left_motor(self, speed):
-        self.left_rope_distance += speed
 
-    k = 0
+        if speed < 0 and self.has_rope_tension():
+            return
+
+        self.left_rope_distance += speed
+        self.motor_left.pos.add(self.motor_left_to_left_corner_vec, speed)
+
+        if speed < 0:
+            if self.ropes_intercept:
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_right.center.y > self.motor_left.center.y:
+                    self.move_right_motor(1, 0.01)
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
+                    self.move_left_motor(-1, 0.01)
+            else:
+                while self.motor_right.center.y > self.motor_left.center.y:
+                    self.move_right_motor(1, 0.01)
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
+                    self.move_right_motor(1, 0.1)
+                    while self.motor_right.center.y < self.motor_left.center.y:
+                        self.move_left_motor(-1, 0.1)
+        else:
+            while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
+                self.move_left_motor(1, 0.01)
+                while self.motor_right.center.y < self.motor_left.center.y <= self.corner_right.center.y + self.right_rope_distance:
+                    self.move_right_motor(-1, 1)
+
+            left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
+            right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+
+            while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance \
+                    and not left_motor_to_right_corner_vec.compare(right_motor_to_right_corner_vec, 2):
+                self.move_right_motor(1, 1.25)
+
+                left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
+                right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+
+            if self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
+                motor_to_motor_forward = self.calculate_vec(self.motor_right.center, self.motor_left.center)
+                new_pos = Vec2(copy=self.motor_right.pos)
+                new_pos.add(motor_to_motor_forward, self.motor_to_motor_starting_distance - 0.1)
+                self.motor_left.pos = new_pos
+                self.left_rope_distance = self.calculate_length(self.motor_left.center, self.corner_left.center)
 
     def spin_right_motor(self, speed):
 
