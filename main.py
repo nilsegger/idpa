@@ -49,9 +49,9 @@ class Window(Frame):
         self.last_frame_datetime = datetime.now()
 
         if 'w' in self.keys and self.keys['w']:
-            self.simulation.spin_left_motor(-50 * self.delta_time)
+            self.simulation.spin_left_motor(-20 * self.delta_time)
         if 's' in self.keys and self.keys['s']:
-            self.simulation.spin_left_motor(50 * self.delta_time)
+            self.simulation.spin_left_motor(20 * self.delta_time)
 
         if 'Up' in self.keys and self.keys['Up']:
             self.simulation.spin_right_motor(-50 * self.delta_time)
