@@ -20,6 +20,8 @@ class Simulation(Object):
         self.left_rope_distance = None
         self.right_rope_distance = None
 
+        self.points_sprayed = []
+
         self.calculate_starting_distances()
 
         self.ropes_too_tense = False
@@ -172,8 +174,23 @@ class Simulation(Object):
             self.ropes_too_tense = False
         return tension
 
+    @property
+    def spray_point(self) -> Vec2:
+        motor_vec = self.calculate_vec(self.motor_left.center, self.motor_right.center)
+        motor_center_point = Vec2(copy=self.motor_left.center)
+        motor_center_point.add(motor_vec, self.current_motor_to_motor_distance / 2)
+        motor_vec.rotate(90)
+        motor_center_point.add(motor_vec, 25)
+        return motor_center_point
+
+    def spray(self):
+        self.points_sprayed.append(self.spray_point)
+
     def draw(self, canvas: Canvas, delta_time: float, window: Frame):
         self.has_rope_tension()
+
+        for sprayed_point in self.points_sprayed:
+            self.draw_point(canvas, sprayed_point, 3, "yellow", "")
 
         self.draw_circle(canvas, self.corner_left, fill_color="red")
         self.draw_circle(canvas, self.corner_right, fill_color="red")
@@ -199,3 +216,5 @@ class Simulation(Object):
         self.draw_line(canvas, self.motor_left, self.motor_right, fill_color=(
             "black" if self.calculate_length(self.motor_left.center,
                                              self.motor_right.center) <= self.motor_to_motor_starting_distance else "red"))
+
+        self.draw_point(canvas, self.spray_point, 3, "green")

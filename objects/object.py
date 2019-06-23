@@ -40,8 +40,8 @@ class Vec2:
         for i in range(after_comma_precision):
             precision *= 10
 
-        self_copy = Vec2(round(self.x*precision), round(self.y*precision))
-        compare_copy = Vec2(round(vec2.x*precision), round(vec2.y*precision))
+        self_copy = Vec2(round(self.x * precision), round(self.y * precision))
+        compare_copy = Vec2(round(vec2.x * precision), round(vec2.y * precision))
         return self_copy.x == compare_copy.x and self_copy.y == compare_copy.y
 
     def print(self, name="Vec2"):
@@ -95,6 +95,11 @@ class Object:
         canvas.create_line(p1.center.x, p1.center.y, p2.center.x, p2.center.y, fill=fill_color)
 
     @staticmethod
-    def draw_circle(canvas: Canvas, object_position: ObjectDimension, fill_color=None):
+    def draw_circle(canvas: Canvas, object_position: ObjectDimension, fill_color=None, outline="black"):
         canvas.create_oval(object_position.pos.x, object_position.pos.y, object_position.pos2.x, object_position.pos2.y,
-                           fill=fill_color)
+                           fill=fill_color, outline=outline)
+
+    @staticmethod
+    def draw_point(canvas: Canvas, pos: Vec2, radius, fill_color=None, outline="black"):
+        canvas.create_oval(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius,
+                           fill=fill_color, outline=outline)

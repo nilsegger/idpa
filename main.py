@@ -12,7 +12,7 @@ from os import system
 
 class Window(Frame):
 
-    def __init__(self, master, simulation : Simulation):
+    def __init__(self, master, simulation: Simulation):
         Frame.__init__(self, master)
         self.destroyed = False
         self.master = master
@@ -58,6 +58,9 @@ class Window(Frame):
         if 'Down' in self.keys and self.keys['Down']:
             self.simulation.spin_right_motor(50 * self.delta_time)
 
+        if 'q' in self.keys and self.keys['q']:
+            self.simulation.spray()
+
         if not self.pause:
             self.canvas.delete("all")
             self.simulation.draw(self.canvas, delta_time=self.delta_time, window=self)
@@ -72,6 +75,7 @@ class Window(Frame):
     def destroy(self):
         self.destroyed = True
         super().destroy()
+
 
 root = Tk()
 root.geometry("960x540")
