@@ -47,13 +47,19 @@ class Simulation(Object):
 
         if speed < 0:
             if self.ropes_intercept:
-                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_right.center.y > self.motor_left.center.y:
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_right.center.y >= self.motor_left.center.y:
                     self.move_right_motor(1, self.slow_forward)
                     if self.motor_right.center.y < self.motor_left.center.y:
                         self.move_right_motor(-1, self.slow_forward)
                         break
-                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
-                    self.move_left_motor(-1, self.medium_forward)
+
+                last_motor_distance = self.current_motor_to_motor_distance
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and last_motor_distance >= self.current_motor_to_motor_distance:
+                    last_motor_distance = self.current_motor_to_motor_distance
+                    self.move_left_motor(-1, self.slow_forward)
+                if last_motor_distance < self.current_motor_to_motor_distance:
+                    self.move_left_motor(1, self.slow_forward)
+
             else:
                 while self.motor_right.center.y > self.motor_left.center.y:
                     self.move_right_motor(1, self.slow_forward)
@@ -94,13 +100,19 @@ class Simulation(Object):
 
         if speed < 0:
             if self.ropes_intercept:
-                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y >= self.motor_right.center.y:
                     self.move_left_motor(-1, self.slow_forward)
                     if self.motor_left.center.y < self.motor_right.center.y:
                         self.move_left_motor(1, self.slow_forward)
                         break
-                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
-                    self.move_right_motor(1, self.medium_forward)
+
+                last_motor_distance = self.current_motor_to_motor_distance
+                while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and last_motor_distance >= self.current_motor_to_motor_distance:
+                    last_motor_distance = self.current_motor_to_motor_distance
+                    self.move_right_motor(1, self.slow_forward)
+                if last_motor_distance < self.current_motor_to_motor_distance:
+                    self.move_right_motor(-1, self.slow_forward)
+
             else:
                 while self.motor_left.center.y > self.motor_right.center.y:
                     self.move_left_motor(-1, self.slow_forward)

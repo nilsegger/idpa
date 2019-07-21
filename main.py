@@ -50,7 +50,7 @@ class Window(Frame):
 
         if not self.pause:
 
-            speed = 20
+            speed = 50
 
             if 'w' in self.keys and self.keys['w']:
                 self.simulation.spin_left_motor(-speed * self.delta_time)
