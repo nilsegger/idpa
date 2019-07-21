@@ -34,7 +34,7 @@ class Window(Frame):
 
     def key_press(self, event):
         if event.keysym == 'space':
-            self.pause = not self.pause
+            pass
         else:
             self.keys[event.keysym] = True
 
@@ -48,20 +48,23 @@ class Window(Frame):
         self.delta_time = datetime.now().timestamp() - self.last_frame_datetime.timestamp()
         self.last_frame_datetime = datetime.now()
 
-        if 'w' in self.keys and self.keys['w']:
-            self.simulation.spin_left_motor(-20 * self.delta_time)
-        if 's' in self.keys and self.keys['s']:
-            self.simulation.spin_left_motor(20 * self.delta_time)
-
-        if 'Up' in self.keys and self.keys['Up']:
-            self.simulation.spin_right_motor(-50 * self.delta_time)
-        if 'Down' in self.keys and self.keys['Down']:
-            self.simulation.spin_right_motor(50 * self.delta_time)
-
-        if 'q' in self.keys and self.keys['q']:
-            self.simulation.spray()
-
         if not self.pause:
+
+            speed = 20
+
+            if 'w' in self.keys and self.keys['w']:
+                self.simulation.spin_left_motor(-speed * self.delta_time)
+            if 's' in self.keys and self.keys['s']:
+                self.simulation.spin_left_motor(speed * self.delta_time)
+
+            if 'Up' in self.keys and self.keys['Up']:
+                self.simulation.spin_right_motor(-speed * self.delta_time)
+            if 'Down' in self.keys and self.keys['Down']:
+                self.simulation.spin_right_motor(speed * self.delta_time)
+
+            if 'q' in self.keys and self.keys['q']:
+                self.simulation.spray()
+
             self.canvas.delete("all")
             self.simulation.draw(self.canvas, delta_time=self.delta_time, window=self)
 

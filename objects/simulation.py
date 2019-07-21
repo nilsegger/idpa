@@ -26,6 +26,11 @@ class Simulation(Object):
 
         self.ropes_too_tense = False
 
+        self.slow_forward = 0.05
+        self.medium_forward = 0.1
+        self.fast_forward = 1
+        self.faster_than_fast_forward = 1.25
+
     def calculate_starting_distances(self):
         self.motor_to_motor_starting_distance = self.calculate_length(self.motor_left.center, self.motor_right.center)
         self.left_rope_distance = self.calculate_length(self.motor_left.center, self.corner_left.center)
@@ -43,28 +48,31 @@ class Simulation(Object):
         if speed < 0:
             if self.ropes_intercept:
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_right.center.y > self.motor_left.center.y:
-                    self.move_right_motor(1, 0.01)
+                    self.move_right_motor(1, self.slow_forward)
+                    if self.motor_right.center.y < self.motor_left.center.y:
+                        self.move_right_motor(-1, self.slow_forward)
+                        break
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
-                    self.move_left_motor(-1, 0.01)
+                    self.move_left_motor(-1, self.medium_forward)
             else:
                 while self.motor_right.center.y > self.motor_left.center.y:
-                    self.move_right_motor(1, 0.01)
+                    self.move_right_motor(1, self.slow_forward)
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
-                    self.move_right_motor(1, 0.1)
+                    self.move_right_motor(1, self.medium_forward)
                     while self.motor_right.center.y < self.motor_left.center.y:
-                        self.move_left_motor(-1, 0.1)
+                        self.move_left_motor(-1, self.medium_forward)
         else:
             while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
-                self.move_left_motor(1, 0.01)
+                self.move_left_motor(1, self.slow_forward)
                 while self.motor_right.center.y < self.motor_left.center.y <= self.corner_right.center.y + self.right_rope_distance:
-                    self.move_right_motor(-1, 1)
+                    self.move_right_motor(-1, self.fast_forward)
 
             left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
             right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
 
             while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance \
                     and not left_motor_to_right_corner_vec.compare(right_motor_to_right_corner_vec, 2):
-                self.move_right_motor(1, 1.25)
+                self.move_right_motor(1, self.faster_than_fast_forward)
 
                 left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
                 right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
@@ -87,28 +95,31 @@ class Simulation(Object):
         if speed < 0:
             if self.ropes_intercept:
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_left.center.y > self.motor_right.center.y:
-                    self.move_left_motor(-1, 0.01)
+                    self.move_left_motor(-1, self.slow_forward)
+                    if self.motor_left.center.y < self.motor_right.center.y:
+                        self.move_left_motor(1, self.slow_forward)
+                        break
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
-                    self.move_right_motor(1, 0.01)
+                    self.move_right_motor(1, self.medium_forward)
             else:
                 while self.motor_left.center.y > self.motor_right.center.y:
-                    self.move_left_motor(-1, 0.01)
+                    self.move_left_motor(-1, self.slow_forward)
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
-                    self.move_left_motor(-1, 0.1)
+                    self.move_left_motor(-1, self.medium_forward)
                     while self.motor_left.center.y < self.motor_right.center.y:
-                        self.move_right_motor(1, 0.1)
+                        self.move_right_motor(1, self.medium_forward)
         else:
             while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
-                self.move_right_motor(-1, 0.01)
+                self.move_right_motor(-1, self.slow_forward)
                 while self.motor_left.center.y < self.motor_right.center.y <= self.corner_left.center.y + self.left_rope_distance:
-                    self.move_left_motor(1, 1)
+                    self.move_left_motor(1, self.fast_forward)
 
             left_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
             right_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_right.center)
 
             while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance \
                     and not left_motor_to_left_corner_vec.compare(right_motor_to_left_corner_vec, 2):
-                self.move_left_motor(-1, 1.25)
+                self.move_left_motor(-1, self.faster_than_fast_forward)
 
                 left_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_left.center)
                 right_motor_to_left_corner_vec = self.calculate_vec(self.corner_left.center, self.motor_right.center)
@@ -166,8 +177,9 @@ class Simulation(Object):
 
     def has_rope_tension(self):
         tension = False
-        if self.calculate_length(self.corner_left.center, self.motor_left.center) + self.motor_to_motor_starting_distance + self.calculate_length(
-                self.motor_right.center, self.corner_right.center) < self.corner_to_corner_distance:
+        if self.calculate_length(self.corner_left.center,
+                                 self.motor_left.center) + self.motor_to_motor_starting_distance + self.calculate_length(
+            self.motor_right.center, self.corner_right.center) < self.corner_to_corner_distance:
             self.ropes_too_tense = True
             tension = True
         else:
