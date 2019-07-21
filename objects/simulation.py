@@ -64,9 +64,9 @@ class Simulation(Object):
                 while self.motor_right.center.y > self.motor_left.center.y:
                     self.move_right_motor(1, self.slow_forward)
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
-                    self.move_right_motor(1, self.medium_forward)
+                    self.move_right_motor(1, self.slow_forward)
                     while self.motor_right.center.y < self.motor_left.center.y:
-                        self.move_left_motor(-1, self.medium_forward)
+                        self.move_left_motor(-1, self.slow_forward)
         else:
             while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
                 self.move_left_motor(1, self.slow_forward)
@@ -117,9 +117,9 @@ class Simulation(Object):
                 while self.motor_left.center.y > self.motor_right.center.y:
                     self.move_left_motor(-1, self.slow_forward)
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
-                    self.move_left_motor(-1, self.medium_forward)
+                    self.move_left_motor(-1, self.slow_forward)
                     while self.motor_left.center.y < self.motor_right.center.y:
-                        self.move_right_motor(1, self.medium_forward)
+                        self.move_right_motor(1, self.slow_forward)
         else:
             while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
                 self.move_right_motor(-1, self.slow_forward)
