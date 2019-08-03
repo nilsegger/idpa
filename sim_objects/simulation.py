@@ -214,13 +214,13 @@ class Simulation(Object):
         self.has_rope_tension()
 
         for sprayed_point in self.points_sprayed:
-            self.draw_point(canvas, sprayed_point, 3, "yellow", "")
+            self.draw_point(canvas, sprayed_point, 3, "black", "")
 
         self.draw_circle(canvas, self.corner_left, fill_color="red")
         self.draw_circle(canvas, self.corner_right, fill_color="red")
 
-        self.draw_circle(canvas, self.motor_left, fill_color="blue")
-        self.draw_circle(canvas, self.motor_right, fill_color="blue")
+        self.draw_circle(canvas, self.motor_left, fill_color="red")
+        self.draw_circle(canvas, self.motor_right, fill_color="red")
 
         self.draw_circle(canvas, ObjectDimension(self.corner_left.center.x - self.left_rope_distance,
                                                  self.corner_left.center.y - self.left_rope_distance,

@@ -18,5 +18,6 @@ class Vision:
         while True:
             frame = self.camera.get_frame()
             if frame is not None:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 cv2.imshow('image', frame)
             cv2.waitKey(16)
