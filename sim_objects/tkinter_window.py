@@ -69,7 +69,7 @@ class Window(Frame):
         self.master.after(16, self.frame)
 
     def get_frame(self):
-        return numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8'))))
+        return numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8')))) if self.ps_frame is not None else None
 
     def destroy(self):
         self.destroyed = True
