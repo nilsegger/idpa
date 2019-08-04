@@ -24,9 +24,14 @@ camera = SimulationCamera(app)
 vision = Vision(camera)
 vision.run_in_thread()
 
+
+def on_destroy_callback():
+    vision.quit()
+
+
+app.set_on_destroy_callback(on_destroy_callback)
+
 root.after(16, app.frame)
 root.mainloop()
-
-
 
 # Motor links, Motor Rechts, Spraydose

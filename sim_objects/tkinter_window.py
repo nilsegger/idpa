@@ -21,6 +21,7 @@ class Window(Frame):
         self.last_frame_datetime = datetime.now()
         self.pause = False
         self.ps_frame = None
+        self.on_destroy = None
         self.init_window()
 
     def init_window(self):
@@ -71,6 +72,13 @@ class Window(Frame):
     def get_frame(self):
         return numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8')))) if self.ps_frame is not None else None
 
+    def set_on_destroy_callback(self, callback):
+        self.on_destroy = callback
+
     def destroy(self):
         self.destroyed = True
+
+        if self.on_destroy is not None:
+            self.on_destroy()
+
         super().destroy()
