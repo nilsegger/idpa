@@ -97,7 +97,7 @@ class Object:
     @staticmethod
     def draw_circle(canvas: Canvas, object_position: ObjectDimension, fill_color=None, outline="black"):
         canvas.create_oval(object_position.pos.x, object_position.pos.y, object_position.pos2.x, object_position.pos2.y,
-                           fill=fill_color, outline=outline)
+                           fill=fill_color, outline=outline, width=1)
 
     @staticmethod
     def draw_point(canvas: Canvas, pos: Vec2, radius, fill_color=None, outline="black"):

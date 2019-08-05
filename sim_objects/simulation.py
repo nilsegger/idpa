@@ -214,23 +214,7 @@ class Simulation(Object):
         self.has_rope_tension()
 
         for sprayed_point in self.points_sprayed:
-            self.draw_point(canvas, sprayed_point, 3, "black", "")
-
-        self.draw_circle(canvas, self.corner_left, fill_color="red")
-        self.draw_circle(canvas, self.corner_right, fill_color="red")
-
-        self.draw_circle(canvas, self.motor_left, fill_color="red")
-        self.draw_circle(canvas, self.motor_right, fill_color="red")
-
-        self.draw_circle(canvas, ObjectDimension(self.corner_left.center.x - self.left_rope_distance,
-                                                 self.corner_left.center.y - self.left_rope_distance,
-                                                 self.left_rope_distance * 2,
-                                                 self.left_rope_distance * 2))
-
-        self.draw_circle(canvas, ObjectDimension(self.corner_right.center.x - self.right_rope_distance,
-                                                 self.corner_right.center.y - self.right_rope_distance,
-                                                 self.right_rope_distance * 2,
-                                                 self.right_rope_distance * 2))
+            self.draw_point(canvas, sprayed_point, 2, "black", "")
 
         self.draw_line(canvas, self.motor_left, self.corner_left,
                        fill_color=("black" if not self.ropes_too_tense else "red"))
@@ -240,5 +224,21 @@ class Simulation(Object):
         self.draw_line(canvas, self.motor_left, self.motor_right, fill_color=(
             "black" if self.calculate_length(self.motor_left.center,
                                              self.motor_right.center) <= self.motor_to_motor_starting_distance else "red"))
+
+        self.draw_circle(canvas, self.corner_left, fill_color="red")
+        self.draw_circle(canvas, self.corner_right, fill_color="red")
+
+        self.draw_circle(canvas, self.motor_left, fill_color="red")
+        self.draw_circle(canvas, self.motor_right, fill_color="red")
+
+        """self.draw_circle(canvas, ObjectDimension(self.corner_left.center.x - self.left_rope_distance,
+                                                 self.corner_left.center.y - self.left_rope_distance,
+                                                 self.left_rope_distance * 2,
+                                                 self.left_rope_distance * 2))
+
+        self.draw_circle(canvas, ObjectDimension(self.corner_right.center.x - self.right_rope_distance,
+                                                 self.corner_right.center.y - self.right_rope_distance,
+                                                 self.right_rope_distance * 2,
+                                                 self.right_rope_distance * 2))"""
 
         self.draw_point(canvas, self.spray_point, 3, "green")
