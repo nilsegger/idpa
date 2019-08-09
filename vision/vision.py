@@ -23,6 +23,10 @@ class Vision:
             frame = self.camera.get_frame()
 
             if frame is not None:
+
+                height, width, channels = frame.shape
+                print(width, "x", height)
+
                 markers = self.camera.get_markers()
 
                 if markers is not None:

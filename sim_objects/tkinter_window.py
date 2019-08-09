@@ -66,7 +66,7 @@ class Window(Frame):
             self.canvas.delete("all")
             self.simulation.draw(self.canvas, delta_time=self.delta_time, window=self)
 
-        self.ps_frame = self.canvas.postscript(colormode='color')
+        self.ps_frame = self.canvas.postscript(colormode='color', pagewidth=1200-1, pageheight=720-1)
         self.master.after(16, self.frame)
 
     def get_frame(self):

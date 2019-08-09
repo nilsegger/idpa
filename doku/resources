@@ -1,6 +1,9 @@
 Tkinter:
     -http://zetcode.com/tkinter/drawing/
 
+    Falsche Grösse
+        - https://stackoverflow.com/questions/51742871/how-to-maintain-canvas-size-when-converting-python-turtle-canvas-to-bitmap?rq=1
+
 OpenCV:
     https://stackoverflow.com/questions/27117705/how-to-update-imshow-window-for-python-opencv-cv2
     https://medium.com/@manivannan_data/drawing-image-using-numpy-and-opencv-565abdbb3670
