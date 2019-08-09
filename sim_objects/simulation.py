@@ -217,9 +217,9 @@ class Simulation(Object):
             self.draw_point(canvas, sprayed_point, 2, "black", "")
 
         self.draw_line(canvas, self.motor_left, self.corner_left,
-                       fill_color=("black" if not self.ropes_too_tense else "red"))
+                       fill_color="black")
         self.draw_line(canvas, self.motor_right, self.corner_right,
-                       fill_color=("black" if not self.ropes_too_tense else "red"))
+                       fill_color="black")
 
         self.draw_line(canvas, self.motor_left, self.motor_right, fill_color=(
             "black" if self.calculate_length(self.motor_left.center,

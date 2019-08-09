@@ -69,6 +69,46 @@ class SimulationCamera(Camera):
                 if len(markers) == 0:
                     return None
                 else:
+
+                    """
+                        Sortierung der Markierungen.
+                        0. Linke Befestigung an der Wand
+                        1. Rechte Befestgung an der Wand
+                        2. Linker Motor
+                        3. Rechter Motor
+                    """
+
+                    sorted_markers = [markers[0]]
+
+                    for i in range(1, len(markers)):
+                        inserted = False
+                        x, y, r = markers[i]
+                        for q in range(len(sorted_markers)):
+                            qx, qy, qr = sorted_markers[q]
+                            if y < qy:
+                                sorted_markers.insert(0, markers[i])
+                                inserted = True
+                                break
+                        if not inserted:
+                            sorted_markers.append(markers[i])
+
+                    if len(sorted_markers) >= 2:
+                        x, y, r = sorted_markers[0]
+                        sx, sy, sr = sorted_markers[1]
+                        if sx < x:
+                            sorted_markers[0] = (sx, sy, sr)
+                            sorted_markers[1] = (x, y, r)
+
+                    if len(sorted_markers) == 4:
+                        x, y, r = sorted_markers[2]
+                        sx, sy, sr = sorted_markers[3]
+                        if sx < x:
+                            sorted_markers[2] = (sx, sy, sr)
+                            sorted_markers[3] = (x, y, r)
+
+                    if len(sorted_markers) > 4:
+                        print("Zu viele Markierungen.")
+
                     return markers
             else:
                 return None
