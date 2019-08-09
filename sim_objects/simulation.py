@@ -225,11 +225,13 @@ class Simulation(Object):
             "black" if self.calculate_length(self.motor_left.center,
                                              self.motor_right.center) <= self.motor_to_motor_starting_distance else "red"))
 
-        self.draw_circle(canvas, self.corner_left, fill_color="red")
-        self.draw_circle(canvas, self.corner_right, fill_color="red")
+        lightred = "#FF816E"
 
-        self.draw_circle(canvas, self.motor_left, fill_color="red")
-        self.draw_circle(canvas, self.motor_right, fill_color="red")
+        self.draw_circle(canvas, self.corner_left, fill_color=lightred, outline=lightred)
+        self.draw_circle(canvas, self.corner_right, fill_color=lightred, outline=lightred)
+
+        self.draw_circle(canvas, self.motor_left, fill_color=lightred, outline=lightred)
+        self.draw_circle(canvas, self.motor_right, fill_color=lightred, outline=lightred)
 
         """self.draw_circle(canvas, ObjectDimension(self.corner_left.center.x - self.left_rope_distance,
                                                  self.corner_left.center.y - self.left_rope_distance,
