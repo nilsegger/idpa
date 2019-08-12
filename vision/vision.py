@@ -11,6 +11,9 @@ class Vision:
         self.thread = None
         self.quit_loop = False
         self.image_to_print = image_to_print
+
+        #self.image_path = np.where(image_to_print)
+
         self.margin_to_markers_horizontal = margin_to_markers_horizontal
         self.margin_to_markers_vertical = margin_to_markers_vertical
 
@@ -48,7 +51,7 @@ class Vision:
                     cv2.rectangle(target, border[0], border[1], (0, 255, 0), 3)
 
                     # Kopiert von https://gist.github.com/IAmSuyogJadhav/305bfd9a0605a4c096383408bee7fd5c
-                    alpha = 0.5
+                    alpha = 0.3
                     frame = cv2.addWeighted(target, alpha, frame, 1 - alpha, 0)
 
                 cv2.imshow('image', frame)

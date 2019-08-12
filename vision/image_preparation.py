@@ -1,5 +1,5 @@
 import cv2
-
+import numpy as np
 
 def prepare_image(path):
     img = cv2.imread(path)
@@ -34,6 +34,4 @@ def prepare_image(path):
             print("Key", key, "not recognized.")
 
     edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-    print(edges.shape)
-
     return edges
