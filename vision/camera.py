@@ -47,13 +47,6 @@ class SimulationCamera(Camera):
 
             if circles is not None:
                 """
-                    Der untenstehende Code bis zu der Variable "mask" ist von https://www.tutorialspoint.com/detection-of-a-specific-color-blue-here-using-opencv-with-python abgeschaut.
-                    Er dient dazu alle roten Farben zu erkennen.
-                """
-
-                # cv2.imshow('Red detection', mask)
-
-                """
                     Hier ist die fortführung des oberen Codes. https://www.bogotobogo.com/python/OpenCV_Python/python_opencv3_Image_Hough%20Circle_Transform.php
                 """
 
@@ -86,7 +79,7 @@ class SimulationCamera(Camera):
                         for q in range(len(sorted_markers)):
                             qx, qy, qr = sorted_markers[q]
                             if y < qy:
-                                sorted_markers.insert(0, markers[i])
+                                sorted_markers.insert(q, markers[i])
                                 inserted = True
                                 break
                         if not inserted:
@@ -109,6 +102,6 @@ class SimulationCamera(Camera):
                     if len(sorted_markers) > 4:
                         print("Zu viele Markierungen.")
 
-                    return markers
+                    return sorted_markers
             else:
                 return None

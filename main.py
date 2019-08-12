@@ -6,6 +6,8 @@ from sim_objects.tkinter_window import Window
 from vision.vision import Vision
 from vision.camera import SimulationCamera
 
+import cv2
+
 Object.CANVAS_WIDTH = 1200
 Object.CANVAS_HEIGHT = 720
 
@@ -34,7 +36,10 @@ simulation = Simulation(motor_left, motor_right, corner_left, corner_right)
 app = Window(root, simulation)
 
 camera = SimulationCamera(app)
-vision = Vision(camera)
+
+image_to_draw = cv2.imread("vision/test_bild.jpg")
+
+vision = Vision(camera, image_to_draw)
 vision.run_in_thread()
 
 
