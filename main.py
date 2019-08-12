@@ -5,6 +5,7 @@ from sim_objects.tkinter_window import Window
 
 from vision.vision import Vision
 from vision.camera import SimulationCamera
+from vision.image_preparation import prepare_image
 
 import cv2
 
@@ -37,7 +38,11 @@ app = Window(root, simulation)
 
 camera = SimulationCamera(app)
 
-image_to_draw = cv2.imread("vision/test_bild.jpg")
+image_to_draw = prepare_image("vision/test_bild.jpg")
+
+if image_to_draw is None:
+    print("Image can not be null to continue.")
+    exit(-1)
 
 vision = Vision(camera, image_to_draw)
 vision.run_in_thread()

@@ -1,0 +1,39 @@
+import cv2
+
+
+def prepare_image(path):
+    img = cv2.imread(path)
+    edges = None
+    min = 650
+    max = 1300
+    step = 50
+
+    confirmed = False
+
+    while not confirmed:
+        print(min, max)
+        edges = cv2.Canny(img, min, max)
+        cv2.imshow('image', edges)
+        key = cv2.waitKey(0)
+
+        if key == 105:  # I
+            max += step
+
+        elif key == 107:  # K
+            max -= step
+
+        elif key == 119:  # W
+            min += step
+
+        elif key == 115:  # S
+            min -= step
+
+        elif key == 13:  # Enter
+            confirmed = True
+        else:
+            print("Key", key, "not recognized.")
+
+    edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+    print(edges.shape)
+
+    return edges
