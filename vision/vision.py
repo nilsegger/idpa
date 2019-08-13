@@ -1,3 +1,5 @@
+import math
+
 from .camera import Camera
 import cv2
 import numpy as np
@@ -112,6 +114,10 @@ class Vision:
             print("No path found?!")
             return
 
+        if len(markers) != 4:
+            print("Missing markers.")
+            return
+
         # TODO, funktionierts vertical und horizontal??
         cm_to_pixel = self.wall_markers_distance_in_cm / (markers[1][0] - markers[0][0])
 
@@ -122,10 +128,33 @@ class Vision:
 
         spray_point = (markers[2][0] + spray_point_x_offset, markers[2][1] + spray_point_y_offset)
 
-        if self.show_process:
-            cv2.circle(overlay, (self.print_path[0][0] + border_offset[0][0], self.print_path[0][1] + border_offset[0][1]),
-                       2, (0, 0, 255), 2)
+        a = markers[2][0] - markers[0][0]
+        b = markers[2][1] - markers[0][1]
+        left_motor_to_left_marker_distance = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+        left_motor_to_left_marker_center = (int(markers[0][0] + a / 2), int(markers[0][1] + b / 2))
 
-            cv2.circle(overlay,
-                       spray_point,
-                       2, (0, 0, 255), 2)
+        a = markers[1][0] - markers[3][0]
+        b = markers[3][1] - markers[1][1]
+        right_motor_to_right_marker_distance = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+        right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
+
+        if self.show_process:
+            self.draw_circle(overlay,
+                             (self.print_path[0][0] + border_offset[0][0], self.print_path[0][1] + border_offset[0][1]),
+                             (0, 0, 255))
+            self.draw_circle(overlay, spray_point, (0, 0, 255))
+
+            self.write_text(overlay, str(int(left_motor_to_left_marker_distance * cm_to_pixel)) + 'cm',
+                            left_motor_to_left_marker_center)
+
+            self.write_text(overlay, str(int(right_motor_to_right_marker_distance * cm_to_pixel)) + 'cm',
+                            right_motor_to_right_marker_center)
+
+    @staticmethod
+    def write_text(overlay, text, position):
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(overlay, text, position, font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_circle(overlay, position, color=(0, 255, 0)):
+        cv2.circle(overlay, position, 2, color, 2)
