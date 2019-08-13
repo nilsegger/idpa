@@ -8,7 +8,7 @@ class Camera:
     def get_frame(self):
         pass
 
-    def get_markers(self):
+    def get_markers(self, frame):
         pass
 
 
@@ -20,8 +20,7 @@ class SimulationCamera(Camera):
     def get_frame(self):
         return self.window.get_frame()
 
-    def get_markers(self):
-        frame = self.get_frame()
+    def get_markers(self, frame):
         if frame is not None:
             """
                 Bei diesem Code gebrauchte ich https://www.bogotobogo.com/python/OpenCV_Python/python_opencv3_Image_Hough%20Circle_Transform.php als Tutorial.
