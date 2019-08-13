@@ -172,7 +172,7 @@ class Vision:
 
         left_motor_in_position = False
         left_target_offset = math.fabs(target_left_motor_to_left_marker_distance - left_motor_to_left_marker_distance)
-        if left_target_offset <= self.precision_in_cm:
+        if left_target_offset <= self.precision_in_cm * cm_to_pixel:
             left_motor_in_position = True
         elif target_left_motor_to_left_marker_distance < left_motor_to_left_marker_distance:
             self.motors.spin_left_motor(-left_target_offset)
@@ -182,7 +182,7 @@ class Vision:
         right_motor_in_position = False
         right_target_offset = math.fabs(
             target_right_motor_to_right_marker_distance - right_motor_to_right_marker_distance)
-        if right_target_offset <= self.precision_in_cm:
+        if right_target_offset <= self.precision_in_cm * cm_to_pixel:
             right_motor_in_position = True
         elif target_right_motor_to_right_marker_distance < right_motor_to_right_marker_distance:
             self.motors.spin_right_motor(-right_target_offset)
