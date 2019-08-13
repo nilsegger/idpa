@@ -128,15 +128,17 @@ class Vision:
 
         spray_point = (markers[2][0] + spray_point_x_offset, markers[2][1] + spray_point_y_offset)
 
-        a = markers[2][0] - markers[0][0]
-        b = markers[2][1] - markers[0][1]
-        left_motor_to_left_marker_distance = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+        left_motor_to_left_marker_distance, a, b = self.distance(markers[0], markers[2])
         left_motor_to_left_marker_center = (int(markers[0][0] + a / 2), int(markers[0][1] + b / 2))
 
-        a = markers[1][0] - markers[3][0]
-        b = markers[3][1] - markers[1][1]
-        right_motor_to_right_marker_distance = math.sqrt(math.pow(a, 2) + math.pow(b, 2))
+        right_motor_to_right_marker_distance, a, b = self.distance(markers[1], markers[3])
         right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
+
+        target_spray_point = self.print_path[0]
+        target_motor_left_position = (
+            target_spray_point[0] - spray_point_x_offset, target_spray_point[1] - spray_point_y_offset,)
+        target_motor_right_position = (
+            target_spray_point[0] + spray_point_x_offset, target_spray_point[1] - spray_point_y_offset,)
 
         if self.show_process:
             self.draw_circle(overlay,
@@ -150,11 +152,20 @@ class Vision:
             self.write_text(overlay, str(int(right_motor_to_right_marker_distance * cm_to_pixel)) + 'cm',
                             right_motor_to_right_marker_center)
 
+            self.draw_circle(overlay, target_motor_left_position, r=markers[2][2])
+            self.draw_circle(overlay, target_motor_right_position, r=markers[3][2])
+
     @staticmethod
     def write_text(overlay, text, position):
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(overlay, text, position, font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
 
     @staticmethod
-    def draw_circle(overlay, position, color=(0, 255, 0)):
-        cv2.circle(overlay, position, 2, color, 2)
+    def draw_circle(overlay, position, color=(0, 255, 0), r=2):
+        cv2.circle(overlay, position, r, color, 2)
+
+    @staticmethod
+    def distance(p1, p2):
+        a = p2[0] - p1[0] if p2[0] > p1[0] else p1[0] - p2[0]
+        b = p2[1] - p1[1] if p2[1] > p1[1] else p1[1] - p2[1]
+        return math.sqrt(math.pow(a, 2) + math.pow(b, 2)), a, b
