@@ -44,7 +44,7 @@ if image_to_draw is None:
     print("Image can not be null to continue.")
     exit(-1)
 
-vision = Vision(camera, image_to_draw)
+vision = Vision(camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
 vision.run_in_thread()
 
 
