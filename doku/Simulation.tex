@@ -49,9 +49,14 @@ numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8'))))
 Die Simulation besteht aus drei Klassen:
 \begin{enumerate} 
 \item \textbf{Window}\newline
-Die Window Klasse ist unter anderem dafür zuständig einen Canvas für die Simulation bereitzustellen und fängt zudem noch Tastatur Schläge ab und steuert mit diesen die Motoren der Simulation an.
-\item Simulation
-\item Object
+Die Window Klasse ist unter anderem dafür zuständig einen Canvas für die Simulation bereit zu stellen und diesen gleichzeitig per Interface Funktion an OpenCV weiterzugeben.
+Die Hauptfunktion ist jedoch die Endlos Schleife zu steuern, diese wird von Tkinter durch folgende Funktion übernommen:
+\begin{lstlisting}
+Tk().after(zeit_in_ms, callback_funktion)
+\end{lstlisting}
+Bei jeder Wiederholung wird die vergangene Zeit gemessen und anhand von abgefangen Tastenschlägen die Geschwindigkeit der Motoren in der Simulation festgelegt.
+\item \textbf{Simulation}\newline
+\item \textbf{Object}\newline
 \end{enumerate}
 
 
