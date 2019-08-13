@@ -17,13 +17,16 @@ class MotorInterface:
             if speed > -self.min:
                 speed = -self.min
             if speed < -self.max:
-                speed = self.max
+                speed = -self.max
         elif speed > 0:
             if speed < self.min:
                 speed = self.min
             elif speed > self.max:
                 speed = self.max
         return speed
+
+    def spray(self):
+        pass
 
 
 class SimulationMotorInterface(MotorInterface):
@@ -43,3 +46,6 @@ class SimulationMotorInterface(MotorInterface):
             return
         speed = self.check_speed(speed)
         self.simulation.spin_right_motor(speed)
+
+    def spray(self):
+        self.simulation.spray()

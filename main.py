@@ -45,9 +45,9 @@ if image_to_draw is None:
     print("Image can not be null to continue.")
     exit(-1)
 
-motor_interface = SimulationMotorInterface(simulation, 0.2, 1)
+motor_interface = SimulationMotorInterface(simulation, 0.01, 2)
 
-vision = Vision(motor_interface, 2, camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
+vision = Vision(motor_interface, 1, camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
 vision.run_in_thread()
 
 

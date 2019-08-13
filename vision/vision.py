@@ -110,12 +110,33 @@ class Vision:
             for x in range(width):
                 if image_to_print[y][x][0] == image_to_print[y][x][1] == image_to_print[y][x][2] == 255:
                     path.append((x, y))
-        return path
+
+        if len(path) == 0:
+            return None
+
+        size = len(path)
+        optimized_path = [path[0]]
+        path.pop(0)
+
+        while len(optimized_path) != size:
+
+            closest_index = 0
+            closest_distance, _, _ = self.distance(optimized_path[len(optimized_path) - 1], path[closest_index])
+
+            for i in range(1, len(path)):
+                d, _, _ = self.distance(optimized_path[-1], path[i])
+                if d < closest_distance:
+                    closest_distance = d
+                    closest_index = i
+
+            optimized_path.append(path[closest_index])
+            del path[closest_index]
+
+        return optimized_path
 
     def follow_path(self, markers, border_offset, overlay):
 
         if len(self.print_path) == 0:
-            print("No path found?!")
             return
 
         if len(markers) != 4:
@@ -149,23 +170,28 @@ class Vision:
         target_right_motor_to_right_marker_distance, a, b = self.distance(markers[1], target_motor_right_position)
         target_right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
 
-
         left_motor_in_position = False
-        if math.fabs(target_left_motor_to_left_marker_distance - left_motor_to_left_marker_distance) <= self.precision_in_cm:
+        left_target_offset = math.fabs(target_left_motor_to_left_marker_distance - left_motor_to_left_marker_distance)
+        if left_target_offset <= self.precision_in_cm:
             left_motor_in_position = True
         elif target_left_motor_to_left_marker_distance < left_motor_to_left_marker_distance:
-            self.motors.spin_left_motor(-self.motors.max)
+            self.motors.spin_left_motor(-left_target_offset)
         else:
-            self.motors.spin_left_motor(self.motors.max)
+            self.motors.spin_left_motor(left_target_offset)
 
         right_motor_in_position = False
-        if math.fabs(
-                target_right_motor_to_right_marker_distance - right_motor_to_right_marker_distance) <= self.precision_in_cm:
+        right_target_offset = math.fabs(
+            target_right_motor_to_right_marker_distance - right_motor_to_right_marker_distance)
+        if right_target_offset <= self.precision_in_cm:
             right_motor_in_position = True
         elif target_right_motor_to_right_marker_distance < right_motor_to_right_marker_distance:
-            self.motors.spin_right_motor(-self.motors.max)
+            self.motors.spin_right_motor(-right_target_offset)
         else:
-            self.motors.spin_right_motor(self.motors.max)
+            self.motors.spin_right_motor(right_target_offset)
+
+        if left_motor_in_position and right_motor_in_position:
+            self.motors.spray()
+            del self.print_path[0]
 
         if self.show_process:
             self.draw_circle(overlay,
@@ -188,8 +214,10 @@ class Vision:
             self.draw_line(overlay, markers[0], target_motor_left_position, color=(0, 0, 255))
             self.draw_line(overlay, markers[1], target_motor_right_position, color=(0, 0, 255))
 
-            self.draw_circle(overlay, target_motor_left_position, color=(0, 0, 255) if not left_motor_in_position else (0, 255, 0), r=markers[2][2])
-            self.draw_circle(overlay, target_motor_right_position, color=(0, 0, 255)  if not right_motor_in_position else (0, 255, 0), r=markers[3][2])
+            self.draw_circle(overlay, target_motor_left_position,
+                             color=(0, 0, 255) if not left_motor_in_position else (0, 255, 0), r=markers[2][2])
+            self.draw_circle(overlay, target_motor_right_position,
+                             color=(0, 0, 255) if not right_motor_in_position else (0, 255, 0), r=markers[3][2])
 
     @staticmethod
     def write_text(overlay, text, position, color=(0, 255, 0)):
