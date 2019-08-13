@@ -4,11 +4,13 @@ from .camera import Camera
 import cv2
 import numpy as np
 import threading
+from .motor_interface import MotorInterface
 
 
 class Vision:
 
-    def __init__(self, camera: Camera, image_to_print, spray_point_offset, wall_markers_distance_in_cm,
+    def __init__(self, motors: MotorInterface, precision_in_cm, camera: Camera, image_to_print, spray_point_offset,
+                 wall_markers_distance_in_cm,
                  margin_to_markers_horizontal=25, margin_to_markers_vertical=200, show_process=True):
         self.camera = camera
         self.thread = None
@@ -20,6 +22,8 @@ class Vision:
         self.spray_point_offset = spray_point_offset
         self.wall_markers_distance_in_cm = wall_markers_distance_in_cm
         self.show_process = show_process
+        self.motors = motors
+        self.precision_in_cm = precision_in_cm
 
     def run_in_thread(self):
         self.thread = threading.Thread(target=self.run)
@@ -145,6 +149,24 @@ class Vision:
         target_right_motor_to_right_marker_distance, a, b = self.distance(markers[1], target_motor_right_position)
         target_right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
 
+
+        left_motor_in_position = False
+        if math.fabs(target_left_motor_to_left_marker_distance - left_motor_to_left_marker_distance) <= self.precision_in_cm:
+            left_motor_in_position = True
+        elif target_left_motor_to_left_marker_distance < left_motor_to_left_marker_distance:
+            self.motors.spin_left_motor(-self.motors.max)
+        else:
+            self.motors.spin_left_motor(self.motors.max)
+
+        right_motor_in_position = False
+        if math.fabs(
+                target_right_motor_to_right_marker_distance - right_motor_to_right_marker_distance) <= self.precision_in_cm:
+            right_motor_in_position = True
+        elif target_right_motor_to_right_marker_distance < right_motor_to_right_marker_distance:
+            self.motors.spin_right_motor(-self.motors.max)
+        else:
+            self.motors.spin_right_motor(self.motors.max)
+
         if self.show_process:
             self.draw_circle(overlay,
                              (self.print_path[0][0] + border_offset[0][0], self.print_path[0][1] + border_offset[0][1]),
@@ -166,8 +188,8 @@ class Vision:
             self.draw_line(overlay, markers[0], target_motor_left_position, color=(0, 0, 255))
             self.draw_line(overlay, markers[1], target_motor_right_position, color=(0, 0, 255))
 
-            self.draw_circle(overlay, target_motor_left_position, color=(0, 0, 255), r=markers[2][2])
-            self.draw_circle(overlay, target_motor_right_position, color=(0, 0, 255), r=markers[3][2])
+            self.draw_circle(overlay, target_motor_left_position, color=(0, 0, 255) if not left_motor_in_position else (0, 255, 0), r=markers[2][2])
+            self.draw_circle(overlay, target_motor_right_position, color=(0, 0, 255)  if not right_motor_in_position else (0, 255, 0), r=markers[3][2])
 
     @staticmethod
     def write_text(overlay, text, position, color=(0, 255, 0)):
