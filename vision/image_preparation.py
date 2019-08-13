@@ -33,5 +33,7 @@ def prepare_image(path):
         else:
             print("Key", key, "not recognized.")
 
+    cv2.destroyWindow('image')
+
     edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
     return edges

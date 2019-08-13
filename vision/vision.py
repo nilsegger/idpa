@@ -25,6 +25,8 @@ class Vision:
         self.quit_loop = True
 
     def run(self):
+
+        u = 0
         while not self.quit_loop:
             frame = self.camera.get_frame()
 
@@ -55,6 +57,10 @@ class Vision:
                     frame = cv2.addWeighted(target, alpha, frame, 1 - alpha, 0)
 
                 cv2.imshow('image', frame)
+                print("Image!", u)
+            else:
+                print("None!", u)
+            u += 1
             cv2.waitKey(1)
 
     def get_canvas_restrictions(self, markers):
