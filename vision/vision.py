@@ -38,25 +38,31 @@ class Vision:
 
                 markers = self.camera.get_markers(frame)
                 if markers is not None:
-                    i = 0
+
+                    border = self.get_canvas_restrictions(markers)
+                    if border is not None:
+                        target[border[0][1]:border[1][1], border[0][0]:border[1][0]] = self.image_to_print
+                        cv2.rectangle(target, border[0], border[1], (0, 255, 0), 3)
+
+                        if len(self.print_path) > 0:
+                            cv2.circle(target,
+                                       (self.print_path[0][0] + border[0][0], self.print_path[0][1] + border[0][1]),
+                                       2, (0, 0, 255), 2)
+
                     for marker in markers:
-                        if i == 2: break
-                        i += 1
                         x, y, r = marker
                         cv2.circle(target, (x, y), r, (0, 255, 0), 2)
 
-                border = self.get_canvas_restrictions(markers)
-                if border is not None:
-                    target[border[0][1]:border[1][1], border[0][0]:border[1][0]] = self.image_to_print
-                    cv2.rectangle(target, border[0], border[1], (0, 255, 0), 3)
+                    if len(markers) == 4:
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        cv2.putText(target, 'Linke Wand', (markers[0][0], markers[0][1]), font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+                        cv2.putText(target, 'Rechte Wand', (markers[1][0], markers[1][1]), font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+                        cv2.putText(target, 'Linker Motor', (markers[2][0], markers[2][1]), font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+                        cv2.putText(target, 'Rechter Motor', (markers[3][0], markers[3][1]), font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    if len(self.print_path) > 0:
-                        cv2.circle(target, (self.print_path[0][0] + border[0][0], self.print_path[0][1] + border[0][1]),
-                                   2, (0, 0, 255), 2)
-
-                    # Kopiert von https://gist.github.com/IAmSuyogJadhav/305bfd9a0605a4c096383408bee7fd5c
-                    alpha = 0.3
-                    frame = cv2.addWeighted(target, alpha, frame, 1 - alpha, 0)
+                # Kopiert von https://gist.github.com/IAmSuyogJadhav/305bfd9a0605a4c096383408bee7fd5c
+                alpha = 0.3
+                frame = cv2.addWeighted(target, alpha, frame, 1 - alpha, 0)
 
                 cv2.imshow('image', frame)
             cv2.waitKey(1)
