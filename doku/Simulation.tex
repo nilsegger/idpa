@@ -39,10 +39,22 @@ Als wir auf die Idee kamen einen Roboter zu bauen und dazu eine Steuerungssoftwa
 \section{Bibliotheken}
 Für die Simulation gebrauche ich Tkinter für die Darstellung. Im Nachhinein war dies vermutlich ein fehlentschluss, dies nicht weil die Bibliothek die Simulation schlecht darstellt, sondern weil sie die Darstellung nicht einfach in eine Pixel Matrix kopieren kann.
 Müsste ich nochmals eine auswahl treffen, so würde diese bei OpenCV liegen, denn mit OpenCV hätte ich nur kleine Performance Verluste beim Transport des Bildes zum Navigationsalgorithmus gehabt. Dies wusste ich im voraus nicht da ich weder mit OpenCV oder Tkinter bekannt war, in Zukunft wird dies aber ein No-Brainer.
-
+Damit ich eine Kamera auf die Simulation simulieren konnte, musste ich den Tkinter Canvas in das einzig Unterstüzte Format exportieren, nähmlich Postscript ein Vektor Format. Postscript wird jedoch natürlich nicht von OpenCV unterstützt und anstatt eine Kamera einfach auf den Bildschirm zu richten, musste ich eine weitere Bibliothek benutzen. PIL (Python Imaging Library) kam hierbei zur Lösung, diese Bibliothek kann Postscript in ein normales Bild verwandeln welches von Numpy (Matrix Bibliothek, welche von OpenCV für die Pixel Matrix von Bildern benutzt wird.) dann als Multidimensionaler Array eingelesen wird und von OpenCV bereit ist.
+Dies entspricht folgendem Code:
 \begin{lstlisting}
-# Code
+numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8'))))
 \end{lstlisting}
+
+\section{Aufbau}
+Die Simulation besteht aus drei Klassen:
+\begin{enumerate} 
+\item \textbf{Window}\newline
+Die Window Klasse ist unter anderem dafür zuständig einen Canvas für die Simulation bereitzustellen und fängt zudem noch Tastatur Schläge ab und steuert mit diesen die Motoren der Simulation an.
+\item Simulation
+\item Object
+\end{enumerate}
+
+
 
 
 \end{document}
