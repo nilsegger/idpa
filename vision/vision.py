@@ -134,11 +134,16 @@ class Vision:
         right_motor_to_right_marker_distance, a, b = self.distance(markers[1], markers[3])
         right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
 
-        target_spray_point = self.print_path[0]
+        target_spray_point = (self.print_path[0][0] + border_offset[0][0], self.print_path[0][1] + border_offset[0][1])
         target_motor_left_position = (
             target_spray_point[0] - spray_point_x_offset, target_spray_point[1] - spray_point_y_offset,)
         target_motor_right_position = (
             target_spray_point[0] + spray_point_x_offset, target_spray_point[1] - spray_point_y_offset,)
+
+        target_left_motor_to_left_marker_distance, a, b = self.distance(markers[0], target_motor_left_position)
+        target_left_motor_to_left_marker_center = (int(markers[0][0] + a / 2), int(markers[0][1] + b / 2))
+        target_right_motor_to_right_marker_distance, a, b = self.distance(markers[1], target_motor_right_position)
+        target_right_motor_to_right_marker_center = (int(markers[1][0] - a / 2), int(markers[1][1] + b / 2))
 
         if self.show_process:
             self.draw_circle(overlay,
@@ -152,17 +157,30 @@ class Vision:
             self.write_text(overlay, str(int(right_motor_to_right_marker_distance * cm_to_pixel)) + 'cm',
                             right_motor_to_right_marker_center)
 
-            self.draw_circle(overlay, target_motor_left_position, r=markers[2][2])
-            self.draw_circle(overlay, target_motor_right_position, r=markers[3][2])
+            self.write_text(overlay, str(int(target_left_motor_to_left_marker_distance * cm_to_pixel)) + 'cm',
+                            target_left_motor_to_left_marker_center, color=(0, 0, 255))
+
+            self.write_text(overlay, str(int(target_right_motor_to_right_marker_distance * cm_to_pixel)) + 'cm',
+                            target_right_motor_to_right_marker_center, color=(0, 0, 255))
+
+            self.draw_line(overlay, markers[0], target_motor_left_position, color=(0, 0, 255))
+            self.draw_line(overlay, markers[1], target_motor_right_position, color=(0, 0, 255))
+
+            self.draw_circle(overlay, target_motor_left_position, color=(0, 0, 255), r=markers[2][2])
+            self.draw_circle(overlay, target_motor_right_position, color=(0, 0, 255), r=markers[3][2])
 
     @staticmethod
-    def write_text(overlay, text, position):
+    def write_text(overlay, text, position, color=(0, 255, 0)):
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(overlay, text, position, font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(overlay, text, position, font, 0.5, color, 2, cv2.LINE_AA)
 
     @staticmethod
     def draw_circle(overlay, position, color=(0, 255, 0), r=2):
         cv2.circle(overlay, position, r, color, 2)
+
+    @staticmethod
+    def draw_line(overlay, p1, p2, color=(0, 255, 0), thickness=2):
+        cv2.line(overlay, (p1[0], p1[1]), (p2[0], p2[1]), color, thickness)
 
     @staticmethod
     def distance(p1, p2):
