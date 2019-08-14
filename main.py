@@ -1,7 +1,7 @@
 from tkinter import *
-from sim.simulation import Simulation
-from sim.object import Object, ObjectDimension
-from sim.tkinter_window import Window
+from simulation.simulation import Simulation
+from simulation.object import Object, ObjectDimension
+from simulation.tkinter_window import Window
 
 from vision.vision import Vision
 from vision.camera import SimulationCamera
@@ -39,7 +39,7 @@ app = Window(root, simulation)
 
 camera = SimulationCamera(app)
 
-image_to_draw = prepare_image("vision/test_bild.jpg")
+image_to_draw = prepare_image("vision/logo.png")
 
 if image_to_draw is None:
     print("Image can not be null to continue.")

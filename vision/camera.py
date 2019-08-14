@@ -1,4 +1,4 @@
-from sim_objects.tkinter_window import Window
+from simulation.tkinter_window import Window
 import cv2
 import numpy as np
 

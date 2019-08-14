@@ -1,4 +1,4 @@
-from sim_objects.simulation import Simulation
+from simulation.simulation import Simulation
 
 class MotorInterface:
 
