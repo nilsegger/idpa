@@ -4,8 +4,8 @@ from datetime import datetime
 import numpy
 from PIL import Image
 
-from sim_objects.object import Object
-from sim_objects.simulation import Simulation
+from simulation.object import Object
+from simulation.simulation import Simulation
 
 
 class Window(Frame):

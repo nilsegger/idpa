@@ -1,10 +1,4 @@
-import random
-from os import system
-from datetime import datetime
-import math
-
 from .object import *
-
 
 class Simulation(Object):
 
@@ -237,10 +231,10 @@ class Simulation(Object):
                                                  self.corner_left.center.y - self.left_rope_distance,
                                                  self.left_rope_distance * 2,
                                                  self.left_rope_distance * 2))
-
+        """
         self.draw_circle(canvas, ObjectDimension(self.corner_right.center.x - self.right_rope_distance,
                                                  self.corner_right.center.y - self.right_rope_distance,
                                                  self.right_rope_distance * 2,
-                                                 self.right_rope_distance * 2))"""
+                                                 self.right_rope_distance * 2))
 
         self.draw_point(canvas, self.spray_point, 3, "green")

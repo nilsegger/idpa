@@ -1,14 +1,9 @@
 from tkinter import *
-from sim.simulation import Simulation
-from sim.object import Object, ObjectDimension
-from sim.tkinter_window import Window
 
-from vision.vision import Vision
-from vision.camera import SimulationCamera
-from vision.image_preparation import prepare_image
-from vision.motor_interface import SimulationMotorInterface
+from simulation.simulation import Simulation
+from simulation.object import Object, ObjectDimension
+from simulation.tkinter_window import Window
 
-import cv2
 
 Object.CANVAS_WIDTH = 1200
 Object.CANVAS_HEIGHT = 720
@@ -36,26 +31,6 @@ corner_right = ObjectDimension(Object.CANVAS_WIDTH - margin_delta - corner_radiu
 
 simulation = Simulation(motor_left, motor_right, corner_left, corner_right)
 app = Window(root, simulation)
-
-camera = SimulationCamera(app)
-
-image_to_draw = prepare_image("vision/test_bild.jpg")
-
-if image_to_draw is None:
-    print("Image can not be null to continue.")
-    exit(-1)
-
-motor_interface = SimulationMotorInterface(simulation, 0.001, 5)
-
-vision = Vision(motor_interface, 1.5, camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
-vision.run_in_thread()
-
-
-def on_destroy_callback():
-    vision.quit()
-
-
-app.set_on_destroy_callback(on_destroy_callback)
 
 root.after(16, app.frame)
 root.mainloop()
