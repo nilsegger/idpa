@@ -51,6 +51,7 @@ class Simulation(Object):
                 while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and last_motor_distance >= self.current_motor_to_motor_distance:
                     last_motor_distance = self.current_motor_to_motor_distance
                     self.move_left_motor(-1, self.slow_forward)
+
                 if last_motor_distance < self.current_motor_to_motor_distance:
                     self.move_left_motor(1, self.slow_forward)
 
@@ -235,7 +236,7 @@ class Simulation(Object):
         self.draw_circle(canvas, ObjectDimension(self.corner_right.center.x - self.right_rope_distance,
                                                  self.corner_right.center.y - self.right_rope_distance,
                                                  self.right_rope_distance * 2,
-                                                 self.right_rope_distance * 2))
-                                                 """
+                                                 self.right_rope_distance * 2))"""
+
 
         self.draw_point(canvas, self.spray_point, 3, "green")

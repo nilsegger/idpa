@@ -4,6 +4,8 @@ from datetime import datetime
 import numpy
 from PIL import Image
 
+import time
+
 from simulation.object import Object
 from simulation.simulation import Simulation
 
@@ -72,7 +74,10 @@ class Window(Frame):
         self.master.after(16, self.frame)
 
     def get_frame(self):
-        return numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8')))) if self.ps_frame is not None else None
+        start = int(round(time.time() * 1000))
+        res = numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8')))) if self.ps_frame is not None else None
+        print("Convert:", int(round(time.time() * 1000)) - start)
+        return res
 
     def set_on_destroy_callback(self, callback):
         self.on_destroy = callback

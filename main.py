@@ -39,7 +39,7 @@ app = Window(root, simulation)
 
 camera = SimulationCamera(app)
 
-image_to_draw = prepare_image("vision/logo.png")
+image_to_draw = prepare_image("vision/pp.jfif")
 
 if image_to_draw is None:
     print("Image can not be null to continue.")

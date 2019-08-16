@@ -218,7 +218,7 @@ def move_left_motor(self, degree: float, forward: float):
 	self.motor_left.pos.add(forward_vec, forward)
 	"""
 		Hier wird die Position noch korrigiert, da die neue Position einbisschen innerhalb des Kreises liegt,
-		muss der neue Punkt noch einbisschen nach aussen korrigiert werden.
+		muss der neue Punkt noch einbisschen nach aussen korrigiert werden. Sonst wuerde der Motor irgendwann bei der Wandmarkierung sein.
 	"""
 	self.motor_left.pos.add(rotation_vec, distance_to_corner - self.current_left_motor_to_corner_distance)
 \end{lstlisting}
@@ -235,7 +235,78 @@ if speed < 0:
 				break
 \end{lstlisting}
 
-Nun kann es passieren, dass der rechte Motor bis auf die gleiche Höhe wie der linke Motor nachgeschoben wurde, jedoch sind sie immer noch weiter auseinander als sie in Echt sein könnten. Dies wird wieder mit dem originalen Abstand versus dem momentan Abstand der Motoren bestimmt.
+Nun kann es passieren, dass der rechte Motor bis auf die gleiche Höhe wie der linke Motor nachgeschoben wurde, jedoch sind sie immer noch weiter auseinander als sie in Echt sein könnten. Dies wird wieder mit dem originalen Abstand versus dem momentan Abstand der Motoren bestimmt. Um den Abstand wieder zu korriegieren muss man den linken Motor seiner Linie nach, nach oben verschieben, bis der kleinst mögliche Abstand erreicht wird.
+
+\begin{lstlisting}
+...
+if speed < 0:
+	if self.ropes_intercept:
+			while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and self.motor_right.center.y >= self.motor_left.center.y:
+				self.move_right_motor(1, self.slow_forward)
+				# Falls der Motor hoeher als der Linke wurde, wird der Motor wieder zurueck positioniert.
+				if self.motor_right.center.y < self.motor_left.center.y:
+					self.move_right_motor(-1, self.slow_forward)
+					break
+					
+		last_motor_distance = self.current_motor_to_motor_distance
+		while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and last_motor_distance >= self.current_motor_to_motor_distance:
+			last_motor_distance = self.current_motor_to_motor_distance
+			self.move_left_motor(-1, self.slow_forward)
+		if last_motor_distance < self.current_motor_to_motor_distance:
+		self.move_left_motor(1, self.slow_forward)
+\end{lstlisting}
+Dies ist der Fertige Code für die erste Situation. Bei der zweiten Situation, wenn die Seile gespannt sind und sich nicht mehr überkreuzen könnten, wird einfach der rechte Motor nachgeschoben bis er die gleiche Höhe wie der linke erreicht, danach ergibt sich aber schnell wieder das gleiche Problem, die Motoren sind zu weit auseinander. Als Lösung wird der linke Motor ein bisschen hochgeschoben und der rechte nachgeschoben bis er wieder die gleiche Höhe erreicht. Dies funktioniert weil die Endpunkte der Seile oben am nächsten beieinander sind.
+\begin{lstlisting}
+...
+if speed < 0:
+	if not self.ropes_intercept:
+		while self.motor_right.center.y > self.motor_left.center.y:
+			self.move_right_motor(1, self.slow_forward)
+		while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance and not self.has_rope_tension():
+		self.move_right_motor(1, self.slow_forward)
+			while self.motor_right.center.y < self.motor_left.center.y:
+				self.move_left_motor(-1, self.slow_forward)
+\end{lstlisting}
+Als letztes gibt es natürlich noch die Situation, wo die Motoren nachlassen und das Seil länger wird. Wenn der linke Motor runter gelassen wird, schaut man zuerst, ob die Motoren Distanz kleiner als der Ursprüngliche Abstand ist. Falls dies der Fall ist, so wird der linke Motor runter gelassen, bis der Abstand erreicht wird. Nun muss der rechte Motor noch nachgeschoben werden, da dieser vom linken mit runter gezogen wird.
+\begin{lstlisting}
+...
+if speed > 0:
+	while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
+		self.move_left_motor(1, self.slow_forward)
+		while self.motor_right.center.y < self.motor_left.center.y <= self.corner_right.center.y + self.right_rope_distance:
+			self.move_right_motor(-1, self.fast_forward)
+\end{lstlisting}
+Nur mit diesem Code ergibt sich das Problem, dass es sich nicht wirklich echt anfühlt, der Motoren Abstand zu gross wird und die Simulation in der Nähe vom unteren Ecken komplett spinnt. Visuell: \newline
+\includegraphics[width=1\textwidth]{fehler.PNG}
+Wie man sieht wäre dies in Echt nicht so. Der linke Motor wurde gerade nach unten hängen. Um dies zu erreichen, erkenne ich den Moment, wo beide Motoren den gleichen Richtungsvektor (Länge bei beiden auf 1 berechnet) zur rechten Wandmarkierung aufweisen. Danach ist es nur noch eine Frage des Motores Abstands welcher noch korrigiert werden muss.
+\begin{lstlisting}
+...
+if speed > 0:
+	while self.current_motor_to_motor_distance < self.motor_to_motor_starting_distance:
+		self.move_left_motor(1, self.slow_forward)
+		while self.motor_right.center.y < self.motor_left.center.y <= self.corner_right.center.y + self.right_rope_distance:
+			self.move_right_motor(-1, self.fast_forward)
+			
+	left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
+	right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+	
+	while self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance \
+	and not left_motor_to_right_corner_vec.compare(right_motor_to_right_corner_vec, 2):
+		self.move_right_motor(1, self.faster_than_fast_forward)
+	
+	left_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_left.center)
+	right_motor_to_right_corner_vec = self.calculate_vec(self.corner_right.center, self.motor_right.center)
+	
+	if self.current_motor_to_motor_distance > self.motor_to_motor_starting_distance:
+		motor_to_motor_forward = self.calculate_vec(self.motor_right.center, self.motor_left.center)
+		new_pos = Vec2(copy=self.motor_right.pos)
+		new_pos.add(motor_to_motor_forward, self.motor_to_motor_starting_distance - 0.1)
+		self.motor_left.pos = new_pos
+		self.left_rope_distance = self.calculate_length(self.motor_left.center, self.corner_left.center)
+\end{lstlisting}
+
+\subsection{Probleme}
+Der Code war während der Entwicklung extrem anfällig für Endlosschleifen, dies konnte ich aber mit der Zeit gut beheben. Die Simulation ist zudem nicht sehr genau, dies liegt darin, dass die Position nicht wirklich berechnet werden, sondern solange herum geschoben wird, bis die Position allen Anforderungen (Motoren Abstand oder zum Beispiel, dass der einte Motor nicht höher sein darf) entspricht. Der Code läuft zudem nicht immer so flüssig wegen der Bewegungsfunktion für die Motoren. Diese Funktion gebraucht nicht lange zum berechnen der neuen Position, sondern macht dies Ungenau. Durch die Ungenauigkeit werden zum Teil Positionen erreicht, welche nicht den Anforderungen entsprechen, und als Folge haben, dass der Code die Position korrigieren muss. Die neue korrigierte Position wurde aber genau gleich erreicht, nämlich mit der ungenauen Funktion, somit sind wir wieder genau gleich weit. Nun stellt man sich vielleicht die Frage, warum die Bewegungsfunktion nicht besser geschrieben wurde. Wie oben schon beschrieben wurde, funktioniert sie in dem man zuerst den Richtungsvektor zur Wandmarkierung misst, diesen um eine gewünschte Anzahl Grad dreht, in unserem Fall immer 1 Grad, diesen Richtungsvektor der Wandmarkierung hinzurechnet und danach einen neuen Richtungsvektor berechnet zwischen dem zu bewegenden Motor und dem neu berechneten Punkt. Danach wird die Länge des Richtungsvektors auf 1 berechnet und die Distanz, welche man den Motor bewegen will, dazu berechnet. Bei dieser letzten Bewegung geht die Rundung des Kreises verloren und man muss die Position, besser gesagt die Distanz zur Wandposition, korrigieren. Dies ist ungenau. Viel besser wäre es wie vorher den Richtungsvektor zwischen Motor und Wandmarkierung zu messen und diesen um weniger als 1 Grad zu drehen. Danach müsst man den Richtungsvektor ganz einfach wieder der Wandmarkierung hinzufügen und der neue Punkt wäre bereits perfekt getroffen worden. Das Problem liegt beim rotieren des Vektors, wenn der Wert des Grades kleiner als eins war, so berechnete Python die neuen Werte komplett falsch. Somit musste ich eine andere Variante finden.
 
 
 \end{document}

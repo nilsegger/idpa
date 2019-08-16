@@ -31,6 +31,9 @@ def prepare_image(path, mock=False):
 
             elif key == 13:  # Enter
                 confirmed = True
+            elif key == -1: # Fenster schliessen
+                cv2.destroyWindow('image')
+                exit(-1)
             else:
                 print("Key", key, "not recognized.")
 
