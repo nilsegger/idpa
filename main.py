@@ -3,7 +3,7 @@ from simulation.simulation import Simulation
 from simulation.object import Object, ObjectDimension
 from simulation.tkinter_window import Window
 
-from vision.vision import Vision
+from vision.vision2 import Vision
 from vision.camera import SimulationCamera
 from vision.image_preparation import prepare_image
 from vision.motor_interface import SimulationMotorInterface
