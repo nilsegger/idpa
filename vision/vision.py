@@ -9,21 +9,25 @@ from .motor_interface import MotorInterface
 
 class Vision:
 
-    def __init__(self, motors: MotorInterface, precision_in_cm, camera: Camera, image_to_print, spray_point_offset,
+    def __init__(self, motors: MotorInterface, max_height_in_cm, precision_in_cm, camera: Camera, image_to_print,
+                 spray_point_offset,
                  wall_markers_distance_in_cm,
-                 margin_to_markers_horizontal=25, margin_to_markers_vertical=200, show_process=True):
+                 margin_to_markers_horizontal_cm=150, margin_to_markers_vertical_cm=200, show_process=True):
         self.camera = camera
         self.thread = None
         self.quit_loop = False
         self.image_to_print = image_to_print
         self.print_path = self.find_path(image_to_print)
-        self.margin_to_markers_horizontal = margin_to_markers_horizontal
-        self.margin_to_markers_vertical = margin_to_markers_vertical
+        self.margin_to_markers_horizontal_cm = margin_to_markers_horizontal_cm
+        self.margin_to_markers_vertical_cm = margin_to_markers_vertical_cm
         self.spray_point_offset = spray_point_offset
         self.wall_markers_distance_in_cm = wall_markers_distance_in_cm
         self.show_process = show_process
         self.motors = motors
         self.precision_in_cm = precision_in_cm
+        self.max_height_in_cm = max_height_in_cm
+
+        self.image_prepared = False
 
     def run_in_thread(self):
         self.thread = threading.Thread(target=self.run)
@@ -51,8 +55,11 @@ class Vision:
                     if border is not None:
 
                         if self.show_process:
-                            overlay[border[0][1]:border[1][1], border[0][0]:border[1][0]] = self.image_to_print
-                            cv2.rectangle(overlay, border[0], border[1], (0, 255, 0), 3)
+                            try:
+                                overlay[border[0][1]:border[1][1], border[0][0]:border[1][0]] = self.image_to_print
+                                cv2.rectangle(overlay, border[0], border[1], (0, 255, 0), 3)
+                            except ValueError:
+                                pass
                         self.follow_path(markers, border, overlay)
 
                     for marker in markers:
@@ -91,19 +98,41 @@ class Vision:
 
         height, width, channels = self.image_to_print.shape
 
-        if width > markers_offset - self.margin_to_markers_horizontal * 2:
-            print("Image to big!")  # TODO was sötti da passiere.
-            return None
+        cm_to_pixel = self.wall_markers_distance_in_cm / markers_offset
 
-        # TODO was wenn sbild höcher isch als es chönti si??
+        recalculate_path = False
 
-        p1 = (int(markers[0][0] + markers_offset / 2 - width / 2), markers[0][1] + self.margin_to_markers_vertical)
+        max_width = markers_offset - self.margin_to_markers_horizontal_cm * cm_to_pixel * 2
+
+        if width > max_width:
+            scale = width / max_width
+            self.image_to_print = cv2.resize(self.image_to_print, (int(max_width), int(height / scale)))
+            recalculate_path = True
+
+        height, width, channels = self.image_to_print.shape
+        max_height = int(markers[1][1] + self.max_height_in_cm * cm_to_pixel) - int(
+            markers[0][1] + self.margin_to_markers_vertical_cm * cm_to_pixel)
+
+        if height > max_height:
+            scale = height / max_height
+            self.image_to_print = cv2.resize(self.image_to_print, (int(max_width / scale), int(max_height)))
+            recalculate_path = True
+
+        if recalculate_path and not self.image_prepared:
+            self.print_path = self.find_path(self.image_to_print)
+            self.image_prepared = True
+
+        p1 = (int(markers[0][0] + markers_offset / 2 - width / 2),
+              int(markers[0][1] + self.margin_to_markers_vertical_cm * cm_to_pixel))
         p2 = (p1[0] + width,
               p1[1] + height)
 
         return p1, p2
 
     def find_path(self, image_to_print):
+
+        print("Calculating path.")
+
         height, width, _ = image_to_print.shape
         path = []
         for y in range(height):
@@ -112,7 +141,10 @@ class Vision:
                     path.append((x, y))
 
         if len(path) == 0:
+            print("No Path!")
             return None
+
+        return path
 
         size = len(path)
         optimized_path = [path[0]]
@@ -136,7 +168,10 @@ class Vision:
 
     def follow_path(self, markers, border_offset, overlay):
 
-        if len(self.print_path) == 0:
+        if self.print_path is None or len(self.print_path) == 0:
+            return
+
+        if border_offset is None:
             return
 
         if len(markers) != 4:
@@ -195,8 +230,15 @@ class Vision:
 
         if len(self.print_path) > 0:
             if self.show_process:
+                self.draw_rect(overlay, (
+                    int(markers[0][0] + self.margin_to_markers_horizontal_cm * cm_to_pixel),
+                    int(markers[0][1] + self.margin_to_markers_vertical_cm * cm_to_pixel)),
+                               (int(markers[1][0] - self.margin_to_markers_horizontal_cm * cm_to_pixel),
+                                int(markers[1][1] + self.max_height_in_cm * cm_to_pixel)))
+
                 self.draw_circle(overlay,
-                                 (self.print_path[0][0] + border_offset[0][0], self.print_path[0][1] + border_offset[0][1]),
+                                 (self.print_path[0][0] + border_offset[0][0],
+                                  self.print_path[0][1] + border_offset[0][1]),
                                  (0, 0, 255))
                 self.draw_circle(overlay, spray_point, (0, 0, 255))
 
@@ -232,6 +274,10 @@ class Vision:
     @staticmethod
     def draw_line(overlay, p1, p2, color=(0, 255, 0), thickness=2):
         cv2.line(overlay, (p1[0], p1[1]), (p2[0], p2[1]), color, thickness)
+
+    @staticmethod
+    def draw_rect(overlay, p1, p2, color=(0, 255, 0), thickness=3):
+        cv2.rectangle(overlay, p1, p2, color, thickness)
 
     @staticmethod
     def distance(p1, p2):
