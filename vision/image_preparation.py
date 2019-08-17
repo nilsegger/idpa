@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def prepare_image(path, mock=False):
+def prepare_image(path, mock=True):
     img = cv2.imread(path)
     edges = None
     min = 100

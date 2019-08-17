@@ -43,6 +43,10 @@ class Vision:
         self.cm_to_pixel = None
         self.canvas_p1 = None
         self.canvas_p2 = None
+        self.left_motor_corner_distance = None
+        self.right_motor_corner_distance = None
+
+        self.print_path = None
 
     def run_in_thread(self):
         self.thread = threading.Thread(target=self.run)
@@ -50,6 +54,7 @@ class Vision:
 
     def quit(self):
         self.quit_loop = True
+        self.thread.join(1)
 
     def run(self):
         while not self.quit_loop:
@@ -63,16 +68,19 @@ class Vision:
 
                 if markers is not None:
                     self.show_markers(overlay, markers)
+
                     if self.calculate_values(markers, overlay):
-                        if self.manage_image_scale(markers, overlay) and self.image_scaled:
-                            self.show_markers(overlay, "Ready")
+
+                        if self.image_scaled:
+                            self.display_message(overlay, "Ready")
+                        else:
+                            self.manage_image_scale(markers, overlay)
 
                 # Kopiert von https://gist.github.com/IAmSuyogJadhav/305bfd9a0605a4c096383408bee7fd5c
                 alpha = 0.4
                 frame = cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
-                cv2.imshow('image', frame)
-
-            cv2.waitKey(1)
+                cv2.imshow('Vision', frame)
+                cv2.waitKey(1)
 
     def calculate_values(self, markers, overlay):
 
@@ -88,6 +96,13 @@ class Vision:
         self.canvas_p2 = (int(markers[1][0] - self.margin_to_markers_horizontal_cm * self.cm_to_pixel),
                           int(markers[1][1] + self.max_height_in_cm * self.cm_to_pixel))
 
+        self.left_motor_corner_distance, a, b = self.distance(markers[0], markers[2])
+        self.write_text(overlay, str(int(round(self.left_motor_corner_distance / self.cm_to_pixel))) + "cm", (markers[0][0] + int(a/2), markers[0][1] + int(b/2)))
+
+        self.right_motor_corner_distance, a, b = self.distance(markers[1], markers[3])
+        self.write_text(overlay, str(int(round(self.right_motor_corner_distance / self.cm_to_pixel))) + "cm",
+                        (markers[1][0] - int(a / 2), markers[1][1] + int(b / 2)))
+
         self.draw_rect(overlay, self.canvas_p1, self.canvas_p2)
 
         return True
@@ -95,39 +110,41 @@ class Vision:
     def manage_image_scale(self, markers, overlay):
 
         if self.last_marker_positions is None:
-            self.image_scale_last = int(round(time.time() * 1000))
+            self.image_scale_last = time.time()
             self.last_marker_positions = markers
             return False
 
         if Vision.position_equals(self.last_marker_positions[0], markers[0]) and Vision.position_equals(
                 self.last_marker_positions[1], markers[1]) and Vision.position_equals(self.last_marker_positions[2],
                                                                                       markers[
-                                                                                          3]) and Vision.position_equals(
+                                                                                          2]) and Vision.position_equals(
             self.last_marker_positions[3], markers[3]):
-
-            delta = int(round(time.time() * 1000)) - self.image_scale_last
+            delta = time.time() - self.image_scale_last
             self.scale_action_timeout -= delta
-
-            self.display_message(overlay, str(self.scale_action_timeout))
 
             if self.scale_action_timeout <= 0:
                 self.scale_image(markers, overlay)
                 return True
+            else:
+                self.display_message(overlay, str(round(self.scale_action_timeout)) + "s")
 
         else:
             self.display_message(overlay, "Markers are still changing...")
             self.scale_action_timeout = self.scale_action_timeout_original
-            return False
+
+        self.last_marker_positions = markers
+        self.image_scale_last = time.time()
+        return False
 
     def scale_image(self, markers, overlay):
 
         if self.image_scale_start == None:
             self.image_scale_start = int(round(time.time()))
-        Vision.display_message(overlay, "Scaling image and calculating path. " + str(
-            int(round(time.time())) - self.image_scale_start) + "s")
-
-        t = threading.Thread(target=self.scale_image_thread, args=(markers,))
-        t.start()
+            t = threading.Thread(target=self.scale_image_thread, args=(markers,))
+            t.start()
+        else:
+            Vision.display_message(overlay, "Scaling image and calculating path. " + str(
+                int(round(time.time())) - self.image_scale_start) + "s")
 
     def scale_image_thread(self, markers):
         max_width = self.wall_markers_offset - (self.margin_to_markers_horizontal_cm * self.cm_to_pixel * 2)
@@ -154,22 +171,21 @@ class Vision:
         path = []
         for y in range(height):
             for x in range(width):
-                if (self.image_to_print[y][x][0] == self.image_to_print[y][x][1] == self.image_to_print[y][x][2]) == 0:
+                if (self.image_to_print[y][x][0] == self.image_to_print[y][x][1] == self.image_to_print[y][x][2]) != 0:
                     path.append((x, y))
 
         if len(path) == 0:
             print("There were no white pixels.")
-            exit(-1)
 
-        return path
+        self.print_path = path
+        print("Path found.")
 
-
-    #TODO udpate
     @staticmethod
-    def position_equals(pos1, pos2, precision=50):
-        print(pos1[0] - pos2[0])
-        print(pos1[1] - pos2[2])
-        return pos1[0] - pos2[0] < precision and pos1[1] - pos2[2] < precision
+    def position_equals(pos1, pos2, precision=0):
+        a = pos1[0] - pos2[0] if pos1[0] > pos2[0] else pos2[0] - pos1[0]
+        b = pos1[1] - pos2[1] if pos1[1] > pos2[1] else pos2[1] - pos1[1]
+        dsq = math.pow(a, 2) + math.pow(b, 2)
+        return dsq <= math.pow(precision, 2)
 
     @staticmethod
     def show_markers(overlay, markers):
