@@ -50,7 +50,7 @@ if image_to_draw is None:
 
 motor_interface = SimulationMotorInterface(simulation, 0.001, 5)
 
-vision = Vision(motor_interface, 500, 1.5, camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
+vision = Vision(motor_interface, 500, 1.5, camera, image_to_draw, (0, 25), corner_right.center.x - corner_left.center.x)
 vision.run_in_thread()
 
 
