@@ -44,6 +44,8 @@ if len(sys.argv) == 1:
 else:
     image_to_draw = prepare_image(sys.argv[1])
 
+print("Image prepared.")
+
 if image_to_draw is None:
     print("Image can not be null to continue.")
     exit(-1)

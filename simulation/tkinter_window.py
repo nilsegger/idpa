@@ -76,7 +76,7 @@ class Window(Frame):
     def get_frame(self):
         start = int(round(time.time() * 1000))
         res = numpy.array(Image.open(io.BytesIO(self.ps_frame.encode('utf-8')))) if self.ps_frame is not None else None
-        # print("Convert:", int(round(time.time() * 1000)) - start)
+        print("Convert:", int(round(time.time() * 1000)) - start)
         return res
 
     def set_on_destroy_callback(self, callback):

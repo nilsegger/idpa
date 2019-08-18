@@ -64,12 +64,15 @@ class Vision:
         self.thread.join(1)
 
     def run(self):
+
         while not self.quit_loop:
             frame = self.camera.get_frame()
             if frame is not None:
-                overlay = frame.copy()
-                markers = self.camera.get_markers(frame)
 
+                overlay = frame.copy()
+                
+                
+                markers = self.camera.get_markers(frame)
                 if markers is not None:
                     self.show_markers(overlay, markers)
 
@@ -100,6 +103,8 @@ class Vision:
                 if k == 13 and self.image_scaled and not self.start_printing:
                     self.start_printing = True
                     self.printing_path_begin_length = len(self.print_path)
+            else:
+                print("Frame is None.")
 
     def calculate_values(self, markers, overlay):
 
