@@ -3,12 +3,13 @@ from simulation.simulation import Simulation
 from simulation.object import Object, ObjectDimension
 from simulation.tkinter_window import Window
 
-from vision.vision2 import Vision
+from vision.vision import Vision
 from vision.camera import SimulationCamera
 from vision.image_preparation import prepare_image
 from vision.motor_interface import SimulationMotorInterface
 
-import sys
+import cv2
+
 Object.CANVAS_WIDTH = 1200
 Object.CANVAS_HEIGHT = 720
 
@@ -38,13 +39,7 @@ app = Window(root, simulation)
 
 camera = SimulationCamera(app)
 
-if len(sys.argv) == 1:
-    print("Kein Bild mitgegeben. Test Bild wird verwendet.")
-    image_to_draw = prepare_image("vision/test_bild.jpg")
-else:
-    image_to_draw = prepare_image(sys.argv[1])
-
-print("Image prepared.")
+image_to_draw = prepare_image("vision/test_bild.jpg")
 
 if image_to_draw is None:
     print("Image can not be null to continue.")
@@ -52,7 +47,7 @@ if image_to_draw is None:
 
 motor_interface = SimulationMotorInterface(simulation, 0.001, 5)
 
-vision = Vision(motor_interface, 500, 1.5, camera, image_to_draw, (0, 25), corner_right.center.x - corner_left.center.x)
+vision = Vision(motor_interface, 1.5, camera, image_to_draw, ((motor_right.center.x - motor_left.center.x) / 2, 25), corner_right.center.x - corner_left.center.x)
 vision.run_in_thread()
 
 

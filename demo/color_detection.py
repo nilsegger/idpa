@@ -4,8 +4,6 @@ import time
 
 time.sleep(1)
 
-img = cv2.imread("cap/simulation.PNG")
-
 cv2.namedWindow("mask")
 cv2.namedWindow("hsv")
 cv2.namedWindow("img")
@@ -14,7 +12,7 @@ lb = 0
 lr = 0
 lg = 0
 ub = 255
-ur = 255
+ur = 254
 ug = 255
 
 
@@ -59,7 +57,7 @@ cv2.createTrackbar("ur", "mask", ur, 255, on_ur)
 min_dist = 20
 param1 = 50
 param2 = 14
-max_radius = 0
+max_radius = 20
 
 
 def on_min_dist(val):
@@ -91,20 +89,20 @@ cv2.createTrackbar("param1", "img", param1, 500, on_param1)
 cv2.createTrackbar("param2", "img", param2, 500, on_param2)
 cv2.createTrackbar("maxRadius", "img", max_radius, 500, on_max_radius)
 
+frame = cv2.imread("wand_mit_leds.png")
 
-def show(frame):
-    img = frame.copy()
+# capture frames from the camera
+while True:
 
     windows = ["img", "hsv", "mask"]
 
     for window in windows:
         if cv2.getWindowProperty(window, cv2.WND_PROP_VISIBLE) < 1:
-            return False
+            break
 
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
-
-    # show the frame
+    img = frame.copy()
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -117,44 +115,21 @@ def show(frame):
 
     if circles is not None:
         circles = np.uint16(np.around(circles))
-        for circle in circles[0, :]:
-            cv2.circle(img, (circle[0], circle[1]), circle[2], (0, 255, 0), 2)
+
+        if len(circles[0, :]) > 10:
+            print("Too many cirles!")
+        else:
+            for circle in circles[0, :]:
+                cv2.circle(img, (circle[0], circle[1]), circle[2], (0, 255, 0), 2)
 
     cv2.imshow("hsv", hsv)
     cv2.imshow("mask", mask)
     cv2.imshow("img", img)
     key = cv2.waitKey(1)
 
-    # clear the stream in preparation for the next frame
-
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
-        return False
-    return True
-
-
-if img is None:
-    from picamera.array import PiRGBArray
-    from picamera import PiCamera
-
-    resolution = (1024, 768)
-    camera = PiCamera()
-    camera.resolution = resolution
-    camera.framerate = 32
-    rawCapture = PiRGBArray(camera, size=resolution)
-
-    # capture frames from the camera
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        img = cv2.flip(frame.array, 0)
-        img = cv2.flip(img, 1)
-        if not show(img):
-            break
-        rawCapture.truncate(0)
-
-
-else:
-    while show(img):
-        pass
+        break
 
 cv2.destroyAllWindows()
 cv2.waitKey(1)

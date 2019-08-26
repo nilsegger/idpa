@@ -54,9 +54,10 @@ def prepare_image(path, mock=False):
             elif key == 13:  # Enter
                 confirmed = True
 
+        cv2.destroyWindow("Vision")
+        cv2.waitKey(1)
+
         if not confirmed:
-            cv2.destroyWindow("Vision")
-            cv2.waitKey(1)
             exit(-1)
 
     else:
