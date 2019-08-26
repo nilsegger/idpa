@@ -26,16 +26,16 @@ def prepare_image(path, mock=False):
 
     if not mock:
 
-        cv2.namedWindow("Vision")
+        cv2.namedWindow("Image Edges")
         cv2.startWindowThread()
         cv2.createTrackbar("min_value", "Image Edges", min_value, 3000, on_min_trackbar)
         cv2.createTrackbar("max_value", "Image Edges", max_value, 3000, on_max_trackbar)
 
         confirmed = False
-        while not confirmed and cv2.getWindowProperty('Vision', cv2.WND_PROP_VISIBLE) > 0:
+        while not confirmed and cv2.getWindowProperty('Image Edges', cv2.WND_PROP_VISIBLE) > 0:
             edges = cv2.Canny(img, min_value, max_value)
 
-            cv2.imshow('Vision', np.hstack([img, cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)]))
+            cv2.imshow('Image Edges', np.hstack([img, cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)]))
 
             key = cv2.waitKey(1)
 
@@ -54,7 +54,7 @@ def prepare_image(path, mock=False):
             elif key == 13:  # Enter
                 confirmed = True
 
-        cv2.destroyWindow("Vision")
+        cv2.destroyWindow("Image Edges")
         cv2.waitKey(1)
 
         if not confirmed:
