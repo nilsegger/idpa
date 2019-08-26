@@ -1,0 +1,11 @@
+- > Color Detection (im Demo Ordner)
+python color_detection.py
+
+-> Image Preperation (im Demo Ordner)
+python image_preparation.py <Bild Pfad>
+
+-> Simulation (cd ..)
+python simulation.py
+
+-> main.py (cd ..)
+python main.py
