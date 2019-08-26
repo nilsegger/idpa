@@ -72,7 +72,7 @@ def prepare_image(path, mock=False):
 
 
 
-def optimize_path(image_to_print, precision = 2):
+def optimize_path(image_to_print, precision = 10):
 
     height, width, _ = image_to_print.shape
     path = []
